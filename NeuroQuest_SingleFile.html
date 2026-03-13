@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#020408">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>NEURO QUEST · AI Quiz Bot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&family=Exo+2:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+/* ─── CSS VARIABLES ─── */
+:root{--glow:#00ffff;--glow2:#aa00ff;--glow3:#00ff88;--bg:#020408;--bg2:#050c14;--glass:rgba(0,20,40,0.7);--glass2:rgba(0,255,255,0.05);--border:rgba(0,255,255,0.3);--text:#e0f8ff;--text2:#88ccdd;--red:#ff4444;--yellow:#ffff00;--green:#00ff88;--font-title:'Orbitron',monospace;--font-mono:'Share Tech Mono',monospace;--font-body:'Exo 2',sans-serif;--radius:12px;--radius-lg:20px;--tr:0.25s cubic-bezier(0.4,0,0.2,1)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;position:relative}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(0,100,255,0.08) 0%,transparent 50%),radial-gradient(ellipse at 80% 80%,rgba(160,0,255,0.08) 0%,transparent 50%),radial-gradient(ellipse at 50% 50%,rgba(0,255,255,0.03) 0%,transparent 70%);z-index:0;pointer-events:none}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,255,0.015) 2px,rgba(0,255,255,0.015) 4px);z-index:0;pointer-events:none}
+/* Wallpapers */
+body[data-wallpaper="cyber"]::before{background:repeating-linear-gradient(45deg,rgba(0,255,255,0.03) 0px,transparent 40px),radial-gradient(ellipse at 30% 70%,rgba(0,80,255,0.15) 0%,transparent 50%),radial-gradient(ellipse at 70% 30%,rgba(160,0,255,0.15) 0%,transparent 50%)}
+body[data-wallpaper="matrix"]::before{background:radial-gradient(ellipse at 50% 50%,rgba(0,255,70,0.08) 0%,transparent 60%),radial-gradient(ellipse at 20% 80%,rgba(0,200,0,0.06) 0%,transparent 40%)}
+body[data-wallpaper="matrix"]{--glow:#00ff44;--border:rgba(0,255,68,0.3)}
+body[data-wallpaper="space"]::before{background:radial-gradient(circle at 10% 20%,rgba(255,200,0,0.05) 0%,transparent 30%),radial-gradient(circle at 80% 60%,rgba(100,0,255,0.1) 0%,transparent 40%),radial-gradient(circle at 50% 90%,rgba(0,100,255,0.08) 0%,transparent 30%)}
+body[data-wallpaper="neon"]{--glow:#ff00ff;--glow2:#00ffff;--border:rgba(255,0,255,0.3)}
+body[data-wallpaper="neon"]::before{background:radial-gradient(ellipse at 0% 0%,rgba(255,0,255,0.12) 0%,transparent 50%),radial-gradient(ellipse at 100% 100%,rgba(0,255,255,0.12) 0%,transparent 50%)}
+#particle-canvas{position:fixed;inset:0;z-index:1;pointer-events:none;width:100%;height:100%}
+/* Layout */
+#app{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;max-width:860px;margin:0 auto;padding:0 12px 80px}
+/* Header */
+#header{display:flex;align-items:center;justify-content:space-between;padding:16px 0 10px;border-bottom:1px solid var(--border)}
+.header-logo{font-family:var(--font-title);font-size:clamp(1rem,3vw,1.4rem);font-weight:900;color:var(--glow);text-shadow:0 0 15px var(--glow);letter-spacing:2px;line-height:1.1}
+.header-logo span{color:var(--glow2);text-shadow:0 0 15px var(--glow2)}
+.header-btns{display:flex;gap:8px}
+.icon-btn{background:var(--glass);border:1px solid var(--border);color:var(--glow);width:40px;height:40px;border-radius:8px;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--tr);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent}
+.icon-btn:hover,.icon-btn:active{background:rgba(0,255,255,0.1);box-shadow:0 0 15px var(--glow);transform:scale(1.05)}
+/* Bot */
+#bot-container{display:flex;flex-direction:column;align-items:center;padding:18px 0 8px;position:relative}
+.bot-body{position:relative;width:clamp(120px,28vw,170px);height:clamp(120px,28vw,170px);display:flex;flex-direction:column;align-items:center;justify-content:center;animation:botFloat 3s ease-in-out infinite}
+.body-float{animation:botFloat 3s ease-in-out infinite}
+.body-bounce{animation:botBounce 0.5s ease-in-out 4}
+.body-wiggle{animation:botWiggle 0.3s ease-in-out 6}
+.body-shake{animation:botShake 0.4s ease-in-out 3}
+.body-jump{animation:botJump 0.6s ease-in-out 2}
+.body-think{animation:botFloat 2s ease-in-out infinite}
+.body-tilt{animation:botTilt 1s ease-in-out 3}
+.body-droop{animation:botDroop 2s ease-in-out 1}
+.body-pulse{animation:botPulse 0.5s ease-in-out 6}
+.body-spin{animation:botSpin 1s ease-in-out 1}
+.body-celebrate{animation:botCelebrate 0.4s ease-in-out 8}
+@keyframes botFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes botBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-25px)}}
+@keyframes botWiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-8deg)}75%{transform:rotate(8deg)}}
+@keyframes botShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@keyframes botJump{0%,100%{transform:translateY(0) scale(1)}40%{transform:translateY(-30px) scale(1.1)}}
+@keyframes botTilt{0%,100%{transform:rotate(0)}50%{transform:rotate(5deg)}}
+@keyframes botDroop{0%{transform:translateY(0)}100%{transform:translateY(8px)}}
+@keyframes botPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes botSpin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+@keyframes botCelebrate{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-15px) rotate(-5deg)}75%{transform:translateY(-15px) rotate(5deg)}}
+.bot-glow{position:absolute;inset:0;border-radius:50%;border:2px solid var(--glow);box-shadow:0 0 25px var(--glow),0 0 50px rgba(0,255,255,0.2);transition:all 0.4s ease}
+.bot-face{width:100%;height:100%;border-radius:50%;background:radial-gradient(ellipse at 40% 35%,#0a2030,#020c18);border:2px solid rgba(0,255,255,0.3);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;position:relative;overflow:hidden}
+.bot-face::before{content:'';position:absolute;top:10%;left:15%;width:30%;height:15%;background:rgba(255,255,255,0.04);border-radius:50%;transform:rotate(-20deg)}
+.bot-antenna{position:absolute;top:-20px;left:50%;transform:translateX(-50%);width:2px;height:20px;background:var(--glow)}
+.antenna-light{position:absolute;top:-5px;left:50%;transform:translateX(-50%);width:8px;height:8px;border-radius:50%;background:var(--glow);box-shadow:0 0 10px var(--glow);animation:antPulse 1.5s ease-in-out infinite}
+@keyframes antPulse{0%,100%{opacity:1;transform:translateX(-50%) scale(1)}50%{opacity:0.4;transform:translateX(-50%) scale(0.7)}}
+.bot-eyes{display:flex;gap:14px;align-items:center}
+.bot-eye{width:22px;height:22px;border-radius:50%;background:var(--glow);box-shadow:0 0 12px var(--glow);transition:all 0.3s ease;position:relative;overflow:hidden}
+.bot-eye::after{content:'';position:absolute;width:8px;height:8px;background:rgba(255,255,255,0.6);border-radius:50%;top:3px;left:4px}
+/* Eye states */
+.blink{height:3px!important;margin-top:10px;border-radius:2px!important}
+.eye-normal{height:22px;border-radius:50%}
+.eye-happy{height:14px;border-radius:50% 50% 50% 50%/80% 80% 20% 20%}
+.eye-sad{height:14px;border-radius:50% 50% 50% 50%/20% 20% 80% 80%}
+.eye-wide{height:26px;width:26px}
+.eye-squint{height:10px;border-radius:2px}
+.eye-shock{height:28px;width:28px;border:2px solid #fff}
+.eye-star{background:transparent;box-shadow:none}
+.eye-star::before{content:'★';position:absolute;font-size:18px;color:var(--yellow);top:50%;left:50%;transform:translate(-50%,-50%);text-shadow:0 0 10px var(--yellow)}
+.eye-angry{height:14px;border-radius:2px;transform:rotate(-15deg);background:var(--red);box-shadow:0 0 12px var(--red)}
+.bot-eye-left.eye-angry{transform:rotate(15deg)}
+.eye-laugh{height:5px;border-radius:2px}
+.eye-tired{height:8px;border-radius:3px;opacity:0.6}
+.eye-determined{height:16px;border-radius:2px}
+.eye-wink{height:3px;border-radius:2px}
+.bot-eye-right.eye-wink{height:22px;border-radius:50%}
+.eye-heart{background:transparent;box-shadow:none}
+.eye-heart::before{content:'♥';position:absolute;font-size:16px;color:#ff44aa;top:50%;left:50%;transform:translate(-50%,-50%);text-shadow:0 0 10px #ff44aa}
+.eye-closed{height:3px;border-radius:2px;opacity:0.4}
+.eye-smug{height:14px;border-radius:0 0 50% 50%}
+.eye-nervous{height:20px;animation:eyeNerve 0.3s linear infinite}
+@keyframes eyeNerve{0%,100%{transform:translateX(0)}50%{transform:translateX(2px)}}
+.eye-cool{background:rgba(0,150,200,0.3);border:2px solid var(--glow);height:6px;border-radius:2px}
+.eye-cry{background:#4466ff;box-shadow:0 0 12px #4466ff}
+.eye-evil{background:#880000;box-shadow:0 0 12px #880000;height:16px;border-radius:2px;transform:rotate(-10deg)}
+.eye-scan{border-radius:3px;animation:eyeScan 1s linear infinite}
+@keyframes eyeScan{0%,100%{background:var(--glow)}50%{background:rgba(0,255,255,0.3)}}
+.eye-uwu{height:5px;border-radius:2px;background:#ffaacc;box-shadow:0 0 8px #ffaacc}
+.eye-focused{height:18px;border-radius:4px}
+.eye-proud{height:16px;background:var(--yellow);box-shadow:0 0 12px var(--yellow)}
+.eye-dizzy{animation:eyeDizzy 0.5s linear infinite}
+@keyframes eyeDizzy{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+.eye-confused{height:20px}
+.bot-eye-right.eye-confused{height:10px}
+/* Mouth */
+.bot-mouth{width:36px;height:14px;border-radius:0 0 20px 20px;border:2px solid var(--glow);border-top:none;transition:all 0.3s ease;position:relative}
+.mouth-neutral{border-bottom:none;border-top:2px solid var(--glow);border-radius:20px 20px 0 0;height:2px}
+.mouth-smile{border-radius:0 0 20px 20px;border-top:none;height:14px}
+.mouth-big-smile{height:20px;width:44px;border-radius:0 0 24px 24px}
+.mouth-frown{border-radius:20px 20px 0 0;border-bottom:none;border-top:2px solid var(--glow)}
+.mouth-open{height:20px;border-radius:50%;border:2px solid var(--glow)}
+.mouth-o{height:18px;width:20px;border-radius:50%;border:2px solid var(--glow)}
+.mouth-hmm{height:2px;border:none;border-top:2px solid var(--glow);border-radius:0;width:24px}
+.mouth-flat{height:2px;border:none;border-top:2px solid var(--glow);border-radius:0}
+.mouth-grin{height:16px;width:44px;border-radius:0 0 30px 30px}
+.mouth-smirk{width:28px;transform:rotate(10deg);height:10px}
+.mouth-growl{border-color:var(--red);box-shadow:0 0 8px var(--red);height:16px;width:40px;border-radius:50%}
+.mouth-laugh{height:22px;width:44px;border-radius:0 0 28px 28px;animation:mLaugh 0.3s ease-in-out infinite alternate}
+@keyframes mLaugh{0%{height:18px}100%{height:24px}}
+.mouth-wavy{border-radius:0;border-style:dashed}
+.mouth-bite{height:6px;border-radius:3px}
+.mouth-cat{height:8px;width:44px;border-top:2px solid var(--glow);border-bottom:none;border-radius:0;position:relative}
+.mouth-cat::before,.mouth-cat::after{content:'';position:absolute;top:-8px;width:16px;height:16px;border:2px solid var(--glow);border-radius:0 0 50% 50%;border-top:none}
+.mouth-cat::before{left:4px}
+.mouth-cat::after{right:4px}
+.mouth-gasp{height:26px;width:26px;border-radius:50%;border:2px solid var(--glow)}
+.mouth-evil{border-color:#880000;box-shadow:0 0 8px #880000}
+.mouth-line{height:2px;border:none;border-top:2px solid var(--glow);border-radius:0;width:30px}
+/* Dialogue */
+.bot-dialogue-area{display:flex;flex-direction:column;align-items:center;width:100%;max-width:500px;padding:0 16px;margin-top:8px}
+.bot-dialogue{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius);padding:10px 16px;font-family:var(--font-mono);font-size:clamp(0.7rem,2.2vw,0.85rem);color:var(--glow);min-height:40px;width:100%;text-align:center;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 0 15px rgba(0,255,255,0.1)}
+.bot-emotion-label{font-family:var(--font-mono);font-size:0.65rem;color:var(--glow2);letter-spacing:2px;margin-top:4px;opacity:0.6}
+/* Screens */
+.screen{display:none;flex:1;flex-direction:column;animation:fadeIn 0.4s ease}
+.screen.active{display:flex}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+/* Start Screen */
+#start-screen{align-items:center;justify-content:center;text-align:center;padding:24px 16px;gap:18px}
+.start-title{font-family:var(--font-title);font-size:clamp(1.5rem,5vw,2.5rem);font-weight:900;color:var(--glow);text-shadow:0 0 20px var(--glow),0 0 40px rgba(0,255,255,0.3);line-height:1.1;letter-spacing:3px}
+.start-title span{color:var(--glow2);text-shadow:0 0 20px var(--glow2)}
+.start-subtitle{font-family:var(--font-mono);font-size:clamp(0.72rem,2.5vw,0.9rem);color:var(--text2);letter-spacing:1px}
+.start-stats{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.stat-chip{background:var(--glass);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-family:var(--font-mono);font-size:0.75rem;color:var(--glow);backdrop-filter:blur(6px)}
+/* Buttons */
+.btn-primary{background:linear-gradient(135deg,rgba(0,255,255,0.15),rgba(0,100,255,0.15));border:2px solid var(--glow);color:var(--glow);font-family:var(--font-title);font-size:clamp(0.85rem,3vw,1.05rem);font-weight:700;letter-spacing:2px;padding:13px 32px;border-radius:var(--radius);cursor:pointer;transition:var(--tr);box-shadow:0 0 20px rgba(0,255,255,0.2);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent;width:100%;max-width:280px;animation:btnGlow 3s ease-in-out infinite}
+@keyframes btnGlow{0%,100%{box-shadow:0 0 20px rgba(0,255,255,0.2)}50%{box-shadow:0 0 35px rgba(0,255,255,0.4)}}
+.btn-primary:hover,.btn-primary:active{background:linear-gradient(135deg,rgba(0,255,255,0.3),rgba(0,100,255,0.3));box-shadow:0 0 30px var(--glow),0 0 60px rgba(0,255,255,0.2);transform:translateY(-2px)}
+.btn-primary:active{transform:translateY(0) scale(0.97)}
+.btn-secondary{background:var(--glass);border:1px solid var(--border);color:var(--text2);font-family:var(--font-mono);font-size:0.82rem;padding:9px 22px;border-radius:var(--radius);cursor:pointer;transition:var(--tr);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent}
+.btn-secondary:hover,.btn-secondary:active{border-color:var(--glow);color:var(--glow);box-shadow:0 0 12px rgba(0,255,255,0.2)}
+/* Quiz Panel */
+#quiz-panel{gap:11px;padding:10px 0}
+.quiz-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.badge{font-family:var(--font-mono);font-size:0.63rem;font-weight:600;letter-spacing:1.5px;padding:3px 10px;border-radius:20px;border:1px solid}
+.badge-easy{border-color:var(--green);color:var(--green)}
+.badge-medium{border-color:var(--yellow);color:var(--yellow)}
+.badge-hard{border-color:var(--red);color:var(--red)}
+.badge-all{border-color:var(--glow);color:var(--glow)}
+.score-row{display:flex;gap:10px;align-items:center;font-family:var(--font-mono);font-size:0.78rem}
+.score-chip{background:var(--glass);border:1px solid var(--border);border-radius:8px;padding:4px 12px;color:var(--glow)}
+.score-label{color:var(--text2);font-size:0.7rem}
+#player-indicator{font-family:var(--font-title);font-size:0.75rem;color:var(--yellow);text-shadow:0 0 10px var(--yellow);letter-spacing:1px;display:none}
+.timer-container{background:rgba(0,255,255,0.05);border:1px solid var(--border);border-radius:var(--radius);padding:9px 14px;display:flex;align-items:center;gap:10px}
+.timer-bar-track{flex:1;height:8px;background:rgba(0,255,255,0.1);border-radius:4px;overflow:hidden}
+#timer-bar{height:100%;border-radius:4px;background:var(--glow);transition:width 1s linear,background 0.5s;box-shadow:0 0 8px currentColor}
+#timer-num{font-family:var(--font-title);font-size:1.1rem;color:var(--glow);text-shadow:0 0 10px var(--glow);min-width:28px;text-align:right}
+.question-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 4px 30px rgba(0,0,0,0.3),inset 0 1px 0 rgba(255,255,255,0.05)}
+#question-text{font-family:var(--font-body);font-size:clamp(0.92rem,3vw,1.15rem);font-weight:600;color:var(--text);line-height:1.5;min-height:56px}
+#options-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+@media(max-width:420px){#options-grid{grid-template-columns:1fr}}
+.option-btn{background:rgba(0,20,40,0.8);border:1px solid rgba(0,255,255,0.2);color:var(--text);border-radius:var(--radius);padding:11px 13px;cursor:pointer;display:flex;align-items:center;gap:9px;text-align:left;transition:var(--tr);font-family:var(--font-body);font-size:clamp(0.78rem,2.5vw,0.92rem);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);-webkit-tap-highlight-color:transparent;position:relative;overflow:hidden}
+.option-btn:hover:not(:disabled){border-color:var(--glow);box-shadow:0 0 15px rgba(0,255,255,0.2);transform:translateY(-2px)}
+.option-btn:active:not(:disabled){transform:translateY(0) scale(0.98)}
+.opt-letter{display:flex;align-items:center;justify-content:center;width:25px;height:25px;flex-shrink:0;border-radius:6px;background:rgba(0,255,255,0.1);border:1px solid rgba(0,255,255,0.3);font-family:var(--font-title);font-size:0.68rem;font-weight:700;color:var(--glow)}
+.opt-text{line-height:1.3}
+.option-btn.correct{border-color:var(--green)!important;background:rgba(0,255,136,0.15)!important;box-shadow:0 0 20px rgba(0,255,136,0.3)!important}
+.option-btn.correct .opt-letter{background:var(--green);color:#000}
+.option-btn.wrong{border-color:var(--red)!important;background:rgba(255,68,68,0.15)!important;box-shadow:0 0 20px rgba(255,68,68,0.3)!important}
+.option-btn.wrong .opt-letter{background:var(--red);color:#fff}
+.option-btn:disabled{cursor:not-allowed}
+/* Explanation */
+#explanation-box{background:rgba(0,40,60,0.8);border:1px solid rgba(0,255,255,0.25);border-radius:var(--radius);padding:13px 15px;display:none}
+#explanation-box.active{display:block;animation:fadeIn 0.3s ease}
+.expl-header{font-family:var(--font-mono);font-size:0.68rem;color:var(--glow);letter-spacing:2px;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.expl-header::before{content:'◈'}
+#explanation-text{font-family:var(--font-body);font-size:clamp(0.78rem,2.5vw,0.88rem);color:var(--text2);line-height:1.6}
+.expl-actions{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+#show-expl-btn{display:none;background:rgba(0,200,255,0.1);border:1px solid rgba(0,255,255,0.3);color:var(--glow);font-family:var(--font-mono);font-size:0.76rem;padding:7px 15px;border-radius:8px;cursor:pointer;transition:var(--tr)}
+#show-expl-btn:hover{background:rgba(0,200,255,0.2);box-shadow:0 0 10px rgba(0,255,255,0.2)}
+#skip-expl-btn{font-family:var(--font-mono);font-size:0.73rem;color:var(--text2);background:none;border:none;cursor:pointer;transition:var(--tr);text-decoration:underline}
+#skip-expl-btn:hover{color:var(--glow)}
+.streak-row{display:flex;gap:10px;justify-content:space-between;font-family:var(--font-mono);font-size:0.73rem;color:var(--text2)}
+/* Results */
+#results-screen{align-items:center;text-align:center;gap:16px;padding:20px 0}
+.result-title{font-family:var(--font-title);font-size:clamp(1.3rem,5vw,2rem);color:var(--yellow);text-shadow:0 0 20px var(--yellow);animation:nFlick 2s ease infinite}
+@keyframes nFlick{0%,95%,100%{opacity:1}96%{opacity:0.4}98%{opacity:0.8}}
+.result-card{background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;width:100%;max-width:400px;backdrop-filter:blur(12px)}
+.result-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(0,255,255,0.1);font-family:var(--font-mono)}
+.result-row:last-child{border:none}
+.result-val{color:var(--glow);font-weight:700;font-size:1.1rem}
+/* Settings Panel */
+#settings-panel{position:fixed;top:0;right:-320px;width:300px;height:100%;background:rgba(2,10,20,0.97);border-left:1px solid var(--border);z-index:1000;transition:right 0.35s cubic-bezier(0.4,0,0.2,1);overflow-y:auto;overflow-x:hidden;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:-10px 0 40px rgba(0,0,0,0.5)}
+#settings-panel.active{right:0}
+.settings-header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);font-family:var(--font-title);font-size:0.82rem;color:var(--glow);letter-spacing:2px;position:sticky;top:0;background:rgba(2,10,20,0.95);z-index:1}
+.settings-body{padding:12px 16px 80px}
+.settings-section{margin-bottom:18px}
+.settings-section-title{font-family:var(--font-mono);font-size:0.63rem;color:var(--glow2);letter-spacing:2px;margin-bottom:9px;padding-bottom:5px;border-bottom:1px solid rgba(170,0,255,0.2)}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;font-family:var(--font-body);font-size:0.83rem;color:var(--text);gap:10px}
+.setting-label{flex:1}
+.setting-sublabel{font-size:0.68rem;color:var(--text2);display:block}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:rgba(0,255,255,0.1);border:1px solid rgba(0,255,255,0.3);border-radius:12px;cursor:pointer;transition:var(--tr)}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:2px;top:2px;background:rgba(0,255,255,0.5);border-radius:50%;transition:var(--tr)}
+.toggle input:checked+.toggle-slider{background:rgba(0,255,255,0.2);border-color:var(--glow);box-shadow:0 0 10px rgba(0,255,255,0.3)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(20px);background:var(--glow)}
+.settings-input,.settings-select{background:rgba(0,20,40,0.8);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:5px 9px;font-family:var(--font-mono);font-size:0.8rem;width:90px;transition:var(--tr)}
+.settings-input:focus,.settings-select:focus{outline:none;border-color:var(--glow);box-shadow:0 0 10px rgba(0,255,255,0.2)}
+.settings-select{width:118px}
+.wallpaper-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:7px}
+.wallpaper-btn{background:var(--glass);border:1px solid rgba(0,255,255,0.2);color:var(--text2);border-radius:8px;padding:7px 5px;cursor:pointer;font-family:var(--font-mono);font-size:0.63rem;text-align:center;transition:var(--tr);-webkit-tap-highlight-color:transparent}
+.wallpaper-btn:hover,.wallpaper-btn.active{border-color:var(--glow);color:var(--glow);box-shadow:0 0 10px rgba(0,255,255,0.2)}
+.settings-upload-btn{display:block;width:100%;background:rgba(0,255,255,0.08);border:1px dashed rgba(0,255,255,0.3);color:var(--text2);border-radius:8px;padding:9px;cursor:pointer;font-family:var(--font-mono);font-size:0.76rem;text-align:center;transition:var(--tr);margin-top:7px;-webkit-tap-highlight-color:transparent}
+.settings-upload-btn:hover{border-color:var(--glow);color:var(--glow)}
+.color-row{display:flex;align-items:center;gap:10px;margin-top:8px}
+#glow-color-input{width:44px;height:32px;border:1px solid var(--border);border-radius:6px;background:none;cursor:pointer;padding:2px}
+.emotion-grid{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.bot-emotion-pick{background:var(--glass);border:1px solid rgba(0,255,255,0.2);color:var(--text2);border-radius:6px;padding:4px 9px;cursor:pointer;font-family:var(--font-mono);font-size:0.63rem;transition:var(--tr);-webkit-tap-highlight-color:transparent}
+.bot-emotion-pick:hover{border-color:var(--glow);color:var(--glow)}
+/* Terminal */
+#terminal-panel{position:fixed;bottom:-400px;left:0;right:0;height:380px;background:rgba(0,4,8,0.97);border-top:1px solid rgba(0,255,255,0.4);z-index:999;transition:bottom 0.35s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;font-family:var(--font-mono);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+#terminal-panel.active{bottom:0}
+.term-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:1px solid rgba(0,255,255,0.2);background:rgba(0,255,255,0.05)}
+.term-title{font-size:0.74rem;color:var(--glow);letter-spacing:2px;display:flex;align-items:center;gap:8px}
+.term-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:antPulse 1s ease-in-out infinite}
+#term-output{flex:1;overflow-y:auto;padding:10px 14px;font-size:clamp(0.7rem,2vw,0.8rem);line-height:1.7}
+#term-output::-webkit-scrollbar{width:4px}
+#term-output::-webkit-scrollbar-thumb{background:rgba(0,255,255,0.3);border-radius:2px}
+.term-input-row{display:flex;align-items:center;padding:8px 14px;border-top:1px solid rgba(0,255,255,0.2);gap:8px}
+.term-prompt{color:var(--glow);font-size:0.83rem;flex-shrink:0}
+#term-input{flex:1;background:none;border:none;color:var(--green);font-family:var(--font-mono);font-size:clamp(0.76rem,2vw,0.85rem);outline:none;caret-color:var(--glow)}
+.term-line{animation:fadeIn 0.2s ease}
+/* JSON Editor */
+#json-editor-modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:2000;display:none;align-items:center;justify-content:center;padding:14px;backdrop-filter:blur(4px)}
+#json-editor-modal.active{display:flex}
+.json-editor-card{background:rgba(2,10,22,0.98);border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:600px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 0 40px rgba(0,255,255,0.1)}
+.json-editor-header{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border);font-family:var(--font-title);font-size:0.78rem;color:var(--glow);letter-spacing:2px}
+#json-textarea{flex:1;background:#010509;border:none;color:#88ff88;font-family:var(--font-mono);font-size:0.78rem;padding:13px;resize:none;height:50vh;min-height:200px;outline:none;line-height:1.6}
+.json-editor-actions{display:flex;gap:9px;padding:11px 16px;border-top:1px solid var(--border);flex-wrap:wrap}
+/* Animation keyframes */
+@keyframes glowPulse{0%,100%{box-shadow:0 0 0px #00ff88}50%{box-shadow:0 0 60px #00ff88,0 0 100px #00ff88}}
+@keyframes shakeHL{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+@keyframes floatStar{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-200px) scale(0.3);opacity:0}}
+@keyframes energyBurst{0%{transform:scale(0);opacity:1}100%{transform:scale(3);opacity:0}}
+@keyframes correctShine{0%{left:-100%}100%{left:200%}}
+@keyframes glitchRed{0%,100%{transform:translate(0)}20%{transform:translate(-4px,2px)}40%{transform:translate(4px,-2px)}60%{transform:translate(-2px,4px)}80%{transform:translate(2px,-4px)}}
+@keyframes staticNoise{0%,100%{opacity:0}50%{opacity:0.3}}
+@keyframes dimFade{0%{opacity:1}50%{opacity:0.3}100%{opacity:1}}
+@keyframes confettiFall{0%{transform:translateY(-50px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+@keyframes screenFlash{0%,100%{opacity:0}30%,70%{opacity:0.7}}
+@keyframes crackLine{0%{width:0;opacity:1}100%{width:100%;opacity:0}}
+@keyframes neonFlicker{0%,100%{opacity:1}20%{opacity:0.2}40%{opacity:1}60%{opacity:0.4}80%{opacity:1}}
+@keyframes rippleOut{0%{transform:scale(0.5);opacity:1}100%{transform:scale(2.5);opacity:0}}
+@keyframes winnerSpin{0%{transform:rotate(0deg) scale(1)}50%{transform:rotate(180deg) scale(1.2)}100%{transform:rotate(360deg) scale(1)}}
+.anim-star{position:absolute;font-size:2rem;animation:floatStar 1.5s ease-out forwards;pointer-events:none}
+.anim-confetti{position:absolute;width:10px;height:10px;border-radius:2px;animation:confettiFall 2s ease-in forwards;pointer-events:none}
+.anim-burst-ring{position:absolute;border-radius:50%;border:3px solid;animation:energyBurst 0.8s ease-out forwards;pointer-events:none}
+.anim-ripple{position:absolute;border-radius:50%;border:2px solid rgba(0,255,136,0.8);animation:rippleOut 0.8s ease-out forwards;pointer-events:none}
+.anim-crack{position:absolute;height:2px;background:linear-gradient(90deg,#ff4444,transparent);animation:crackLine 0.5s ease-out forwards;pointer-events:none}
+/* Responsive */
+@media(max-width:480px){#header{padding:10px 0 8px}.bot-body{width:108px;height:108px}.bot-eye{width:18px;height:18px}.bot-mouth{width:28px}#settings-panel{width:100%;right:-100%}.quiz-header{flex-direction:column;align-items:flex-start}}
+@media(min-width:768px){#app{padding:0 20px 80px}.bot-body{width:155px;height:155px}}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(0,255,255,0.3);border-radius:2px}
+</style>
+</head>
+<body>
+<canvas id="particle-canvas" aria-hidden="true"></canvas>
+<div id="app">
+  <!-- HEADER -->
+  <header id="header">
+    <div class="header-logo">NEURO<span>QUEST</span></div>
+    <div class="header-btns">
+      <button class="icon-btn" id="terminal-btn" title="Terminal" aria-label="Terminal">&gt;_</button>
+      <button class="icon-btn" id="settings-btn" title="Settings" aria-label="Settings">⚙</button>
+    </div>
+  </header>
+  <!-- BOT -->
+  <div id="bot-container" aria-live="polite" aria-label="AI Quiz Bot">
+    <div class="bot-body body-float">
+      <div class="bot-glow"></div>
+      <div class="bot-antenna"><div class="antenna-light"></div></div>
+      <div class="bot-face">
+        <div class="bot-eyes">
+          <div class="bot-eye bot-eye-left eye-normal"></div>
+          <div class="bot-eye bot-eye-right eye-normal"></div>
+        </div>
+        <div class="bot-mouth mouth-neutral"></div>
+      </div>
+    </div>
+    <div class="bot-dialogue-area">
+      <div class="bot-dialogue" id="bot-dialogue" aria-live="polite">INITIALIZING...</div>
+      <div class="bot-emotion-label">IDLE</div>
+    </div>
+  </div>
+  <!-- START SCREEN -->
+  <section id="start-screen" class="screen active">
+    <h1 class="start-title">NEURO<span>QUEST</span></h1>
+    <p class="start-subtitle">[ ADAPTIVE AI KNOWLEDGE CHALLENGE ]</p>
+    <div class="start-stats">
+      <span class="stat-chip" id="q-count-chip">📚 15 QUESTIONS</span>
+      <span class="stat-chip">⚡ MULTIPLE CHOICE</span>
+      <span class="stat-chip">🤖 AI BOT GUIDE</span>
+    </div>
+    <button class="btn-primary" id="start-btn">▶ INITIALIZE QUIZ</button>
+    <button class="btn-secondary" id="json-editor-btn" style="max-width:280px;width:100%;margin-top:-6px;">+ Load Custom Questions</button>
+  </section>
+  <!-- QUIZ PANEL -->
+  <section id="quiz-panel" class="screen">
+    <div class="quiz-header">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <span class="badge badge-easy" id="diff-badge">EASY</span>
+        <span class="badge" style="border-color:rgba(0,255,255,0.3);color:var(--text2);" id="cat-badge">AI BASICS</span>
+      </div>
+      <span id="q-counter" style="font-family:var(--font-mono);font-size:0.76rem;color:var(--text2);">Q 1 / 15</span>
+      <div id="player-indicator"></div>
+    </div>
+    <div class="score-row">
+      <div class="score-chip"><span class="score-label">P1 ◈ </span><span id="score-p1">0</span></div>
+      <div id="score-p2-row" class="score-chip" style="display:none;"><span class="score-label">P2 ◈ </span><span id="score-p2">0</span></div>
+      <div class="streak-row" style="margin-left:auto;"><span id="streak-p1">🔥 0</span><span id="streak-p2" style="display:none;">🔥 0</span></div>
+    </div>
+    <div class="timer-container">
+      <div class="timer-bar-track"><div id="timer-bar" style="width:100%"></div></div>
+      <span id="timer-num">30</span>
+    </div>
+    <div class="question-card">
+      <p id="question-text">Loading...</p>
+      <div id="options-grid"></div>
+      <div style="margin-top:11px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <button id="show-expl-btn">💡 Show Explanation</button>
+      </div>
+    </div>
+    <div id="explanation-box">
+      <div class="expl-header">EXPLANATION</div>
+      <p id="explanation-text"></p>
+      <div class="expl-actions"><button id="skip-expl-btn">Skip →</button></div>
+    </div>
+  </section>
+  <!-- RESULTS -->
+  <section id="results-screen" class="screen">
+    <h2 class="result-title">⚡ QUIZ COMPLETE ⚡</h2>
+    <div id="result-winner" style="font-family:var(--font-title);font-size:1.15rem;color:var(--yellow);text-shadow:0 0 15px var(--yellow);">🏆 Score: 0</div>
+    <div class="result-card">
+      <div class="result-row"><span>Player 1 Score</span><span class="result-val" id="result-p1-score">0</span></div>
+      <div class="result-row" id="result-p2-row-res" style="display:none;"><span>Player 2 Score</span><span class="result-val" id="result-p2-score">0</span></div>
+      <div class="result-row"><span>Questions</span><span class="result-val" id="result-total">0</span></div>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+      <button class="btn-primary" id="restart-btn">↺ PLAY AGAIN</button>
+      <button class="btn-secondary" id="result-edit-btn">✏ Edit Questions</button>
+    </div>
+  </section>
+</div>
+
+<!-- SETTINGS PANEL -->
+<aside id="settings-panel" aria-label="Settings">
+  <div class="settings-header">
+    <span>⚙ SETTINGS</span>
+    <button class="icon-btn" id="close-settings" style="width:32px;height:32px;font-size:0.9rem;">✕</button>
+  </div>
+  <div class="settings-body">
+    <div class="settings-section">
+      <div class="settings-section-title">◈ QUESTIONS</div>
+      <label class="settings-upload-btn" for="upload-json-input">📂 Upload JSON File<input type="file" id="upload-json-input" accept=".json,application/json" style="display:none"></label>
+      <button class="settings-upload-btn" onclick="document.getElementById('json-editor-modal').classList.add('active')" style="margin-top:6px;">✏ Open JSON Editor</button>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">◈ QUIZ OPTIONS</div>
+      <div class="setting-row">
+        <label class="setting-label" for="difficulty-select">Difficulty<span class="setting-sublabel">Filter by level</span></label>
+        <select class="settings-select" id="difficulty-select"><option value="all">All</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select>
+      </div>
+      <div class="setting-row">
+        <label class="setting-label" for="timer-input">Timer (sec)<span class="setting-sublabel">Per question</span></label>
+        <input type="number" class="settings-input" id="timer-input" min="5" max="120" value="30">
+      </div>
+      <div class="setting-row">
+        <label class="setting-label" for="progressive-toggle">Progressive Mode<span class="setting-sublabel">Easy → Hard order</span></label>
+        <label class="toggle"><input type="checkbox" id="progressive-toggle"><span class="toggle-slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <label class="setting-label" for="twoplayer-toggle">2-Player Mode<span class="setting-sublabel">Same device co-op</span></label>
+        <label class="toggle"><input type="checkbox" id="twoplayer-toggle"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">◈ DISPLAY</div>
+      <div class="setting-row">
+        <label class="setting-label" for="typewriter-toggle">Question Typewriter<span class="setting-sublabel">Animated question text</span></label>
+        <label class="toggle"><input type="checkbox" id="typewriter-toggle" checked><span class="toggle-slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <label class="setting-label" for="expl-typewriter-toggle">Explanation Typewriter<span class="setting-sublabel">Animated explanations</span></label>
+        <label class="toggle"><input type="checkbox" id="expl-typewriter-toggle" checked><span class="toggle-slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <label class="setting-label" for="anim-toggle">Animations<span class="setting-sublabel">Answer feedback effects</span></label>
+        <label class="toggle"><input type="checkbox" id="anim-toggle" checked><span class="toggle-slider"></span></label>
+      </div>
+      <div class="setting-row">
+        <label class="setting-label" for="particles-toggle">Particle Effects<span class="setting-sublabel">Background particles</span></label>
+        <label class="toggle"><input type="checkbox" id="particles-toggle" checked><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">◈ AUDIO</div>
+      <div class="setting-row">
+        <label class="setting-label" for="sound-toggle">Sound Effects<span class="setting-sublabel">Feedback sounds</span></label>
+        <label class="toggle"><input type="checkbox" id="sound-toggle" checked><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">◈ WALLPAPER</div>
+      <div class="wallpaper-grid">
+        <button class="wallpaper-btn active" data-wall="default">🌌 Default</button>
+        <button class="wallpaper-btn" data-wall="cyber">⚡ Cyber</button>
+        <button class="wallpaper-btn" data-wall="matrix">💚 Matrix</button>
+        <button class="wallpaper-btn" data-wall="space">🚀 Space</button>
+        <button class="wallpaper-btn" data-wall="neon">🌸 Neon</button>
+      </div>
+      <label class="settings-upload-btn" for="upload-wallpaper-input" style="margin-top:8px;">🖼 Upload Custom Wallpaper<input type="file" id="upload-wallpaper-input" accept="image/*" style="display:none"></label>
+      <div class="color-row">
+        <label style="font-family:var(--font-mono);font-size:0.73rem;color:var(--text2);">Glow Color</label>
+        <input type="color" id="glow-color-input" value="#00ffff">
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title">◈ BOT EMOTIONS</div>
+      <div class="emotion-grid">
+        <button class="bot-emotion-pick" data-emotion="idle">😐 idle</button>
+        <button class="bot-emotion-pick" data-emotion="happy">😄 happy</button>
+        <button class="bot-emotion-pick" data-emotion="excited">🤩 excited</button>
+        <button class="bot-emotion-pick" data-emotion="sad">😢 sad</button>
+        <button class="bot-emotion-pick" data-emotion="angry">😤 angry</button>
+        <button class="bot-emotion-pick" data-emotion="thinking">🤔 think</button>
+        <button class="bot-emotion-pick" data-emotion="surprised">😲 surprise</button>
+        <button class="bot-emotion-pick" data-emotion="laughing">😂 laugh</button>
+        <button class="bot-emotion-pick" data-emotion="love">😍 love</button>
+        <button class="bot-emotion-pick" data-emotion="sleep">😴 sleep</button>
+        <button class="bot-emotion-pick" data-emotion="cool">😎 cool</button>
+        <button class="bot-emotion-pick" data-emotion="wink">😉 wink</button>
+        <button class="bot-emotion-pick" data-emotion="evil">😈 evil</button>
+        <button class="bot-emotion-pick" data-emotion="celebrate">🥳 celeb</button>
+        <button class="bot-emotion-pick" data-emotion="dizzy">😵 dizzy</button>
+        <button class="bot-emotion-pick" data-emotion="cute">🥺 cute</button>
+        <button class="bot-emotion-pick" data-emotion="loading">⚙ load</button>
+        <button class="bot-emotion-pick" data-emotion="robotic">🤖 robot</button>
+        <button class="bot-emotion-pick" data-emotion="nervous">😰 nervous</button>
+        <button class="bot-emotion-pick" data-emotion="smug">😏 smug</button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- TERMINAL PANEL -->
+<div id="terminal-panel" aria-label="Developer Terminal">
+  <div class="term-header">
+    <div class="term-title"><div class="term-dot"></div>NEURO-TERMINAL v2.0</div>
+    <button class="icon-btn" id="close-terminal" style="width:32px;height:32px;font-size:0.85rem;">✕</button>
+  </div>
+  <div id="term-output" aria-live="polite"></div>
+  <div class="term-input-row">
+    <span class="term-prompt">root@neuro:~$</span>
+    <input type="text" id="term-input" placeholder="type a command..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+  </div>
+</div>
+
+<!-- JSON EDITOR MODAL -->
+<div id="json-editor-modal">
+  <div class="json-editor-card">
+    <div class="json-editor-header">
+      <span>◈ JSON QUESTION EDITOR</span>
+      <button class="icon-btn" id="close-json-editor" style="width:32px;height:32px;font-size:0.9rem;">✕</button>
+    </div>
+    <textarea id="json-textarea" spellcheck="false" placeholder='Paste your JSON questions array here...'></textarea>
+    <div class="json-editor-actions">
+      <button class="btn-primary" id="apply-json-btn" style="flex:1;max-width:160px;padding:10px;">✓ Apply</button>
+      <button class="btn-secondary" id="format-json-btn">{ } Format</button>
+      <label class="btn-secondary" for="upload-json-from-editor" style="cursor:pointer;display:flex;align-items:center;">📂 Upload<input type="file" id="upload-json-from-editor" accept=".json" style="display:none"></label>
+    </div>
+  </div>
+</div>
+
+<!-- ANIM OVERLAY -->
+<div id="anim-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden;"></div>
+
+<script>
+'use strict';
+
+// ══════════════════════════════════════════════════════
+//  SAMPLE QUESTIONS (built-in, no external file needed)
+// ══════════════════════════════════════════════════════
+const SAMPLE_QUESTIONS = [
+  {id:1,question:"What does AI stand for?",options:["Automated Intelligence","Artificial Intelligence","Advanced Integration","Analog Interface"],answer:1,difficulty:"easy",category:"AI Basics",explanation:"AI stands for Artificial Intelligence — the simulation of human intelligence processes by machines, including learning, reasoning, and self-correction."},
+  {id:2,question:"Which programming language is most commonly used for Machine Learning?",options:["Java","C++","Python","Ruby"],answer:2,difficulty:"easy",category:"Programming",explanation:"Python dominates machine learning due to its simplicity and powerful libraries like TensorFlow, PyTorch, and scikit-learn."},
+  {id:3,question:"What is a neural network inspired by?",options:["Electric circuits","The human brain","DNA structure","Solar systems"],answer:1,difficulty:"easy",category:"AI Basics",explanation:"Neural networks are inspired by biological neural networks in the human brain, consisting of interconnected nodes (neurons) that process information."},
+  {id:4,question:"What does GPU stand for?",options:["General Processing Unit","Graphics Processing Unit","Global Power Unit","Graphic Program Utility"],answer:1,difficulty:"easy",category:"Hardware",explanation:"GPU stands for Graphics Processing Unit. Originally for graphics, GPUs excel at parallel computation, making them ideal for training deep learning models."},
+  {id:5,question:"Which of these is NOT a type of machine learning?",options:["Supervised Learning","Unsupervised Learning","Emotional Learning","Reinforcement Learning"],answer:2,difficulty:"medium",category:"ML Types",explanation:"The three main types of ML are Supervised, Unsupervised, and Reinforcement Learning. 'Emotional Learning' is not a formal ML category."},
+  {id:6,question:"What is 'overfitting' in machine learning?",options:["Training too fast","Model performs well on training data but poorly on new data","Using too many GPUs","Data compression technique"],answer:1,difficulty:"medium",category:"ML Concepts",explanation:"Overfitting occurs when a model memorizes training data including noise, leading to poor performance on unseen data."},
+  {id:7,question:"What is the Turing Test designed to evaluate?",options:["Computer speed","A machine's ability to exhibit intelligent behavior indistinguishable from a human","Network bandwidth","Code efficiency"],answer:1,difficulty:"medium",category:"AI History",explanation:"Proposed by Alan Turing in 1950, the Turing Test evaluates whether a machine can exhibit intelligent behavior indistinguishable from a human."},
+  {id:8,question:"What does 'NLP' stand for in AI?",options:["Neural Link Protocol","Natural Language Processing","Network Layer Processing","Normalized Learning Path"],answer:1,difficulty:"medium",category:"AI Fields",explanation:"NLP stands for Natural Language Processing — enabling machines to understand, interpret, and generate human language."},
+  {id:9,question:"Which activation function is most commonly used in deep learning hidden layers?",options:["Sigmoid","Tanh","ReLU","Linear"],answer:2,difficulty:"hard",category:"Deep Learning",explanation:"ReLU (Rectified Linear Unit) outputs max(0,x), solving the vanishing gradient problem that plagued sigmoid and tanh functions in deep networks."},
+  {id:10,question:"What is 'backpropagation' in neural networks?",options:["Running a network in reverse","Algorithm to compute gradients for weight updates","Removing unused neurons","Data preprocessing step"],answer:1,difficulty:"hard",category:"Deep Learning",explanation:"Backpropagation computes gradients of the loss function by propagating error signals backward through network layers to update weights."},
+  {id:11,question:"What is a 'transformer' architecture primarily used for?",options:["Image compression","Processing sequential data with attention mechanisms","Hardware acceleration","Database indexing"],answer:1,difficulty:"hard",category:"Deep Learning",explanation:"Transformers use self-attention mechanisms to process all tokens in parallel, enabling powerful models like GPT and BERT."},
+  {id:12,question:"What does GAN stand for?",options:["Global Array Network","Generative Adversarial Network","Gradient Amplification Node","General Attention Normalizer"],answer:1,difficulty:"hard",category:"Deep Learning",explanation:"GAN stands for Generative Adversarial Network — two competing networks: a Generator creating fake data and a Discriminator detecting fakes."},
+  {id:13,question:"Which company developed ChatGPT?",options:["Google","Meta","OpenAI","Microsoft"],answer:2,difficulty:"easy",category:"AI Companies",explanation:"ChatGPT was developed by OpenAI. While Microsoft has a major investment in OpenAI, the model was built and deployed by OpenAI's team."},
+  {id:14,question:"What is 'dropout' in neural network training?",options:["When a model fails","Randomly deactivating neurons during training to prevent overfitting","Removing training data","Network timeout"],answer:1,difficulty:"medium",category:"Deep Learning",explanation:"Dropout randomly deactivates neurons during each training step, forcing the network to learn redundant representations and reducing overfitting."},
+  {id:15,question:"What is 'transfer learning' in AI?",options:["Copying weights between computers","Using a pre-trained model as a starting point for a new task","Sending models over the internet","Data migration"],answer:1,difficulty:"medium",category:"ML Concepts",explanation:"Transfer learning leverages knowledge from training on one task to improve learning on a related task, dramatically reducing training time and data needs."}
+];
+
+// ══════════════════════════════════════════════════════
+//  PARTICLE ENGINE
+// ══════════════════════════════════════════════════════
+class ParticleEngine {
+  constructor(canvasId) {
+    this.canvas = document.getElementById(canvasId);
+    this.ctx = this.canvas ? this.canvas.getContext('2d') : null;
+    this.particles = [];
+    this.active = true;
+    this.animFrameId = null;
+    this.maxParticles = 55;
+    this.lastTime = 0;
+    if (this.canvas) {
+      this.resize();
+      window.addEventListener('resize', () => this.resize());
+      this.loop(0);
+    }
+  }
+  resize() { if (!this.canvas) return; this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight; }
+  createParticle(x, y, type='ambient') {
+    const colors = ['#00ffff','#ff00ff','#aa88ff','#00ff88','#ffff00'];
+    return { x: x||Math.random()*this.canvas.width, y: y||Math.random()*this.canvas.height,
+      vx:(Math.random()-0.5)*(type==='burst'?6:1), vy:(Math.random()-0.5)*(type==='burst'?6:0.5)-(type==='ambient'?0.5:2),
+      size:Math.random()*(type==='burst'?5:3)+1, color:colors[Math.floor(Math.random()*colors.length)],
+      alpha:1, life:1, decay:type==='burst'?Math.random()*0.02+0.01:Math.random()*0.005+0.002, type };
+  }
+  burst(x, y, count=20) { for(let i=0;i<count;i++) this.particles.push(this.createParticle(x,y,'burst')); }
+  loop(ts) {
+    if (!this.active || !this.ctx) return;
+    this.animFrameId = requestAnimationFrame(t => this.loop(t));
+    if (ts - this.lastTime < 33) return;
+    this.lastTime = ts;
+    this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+    if (this.particles.filter(p=>p.type==='ambient').length < this.maxParticles) {
+      if (Math.random()<0.3) this.particles.push(this.createParticle());
+    }
+    this.particles = this.particles.filter(p=>p.life>0);
+    this.particles.forEach(p => {
+      p.x+=p.vx; p.y+=p.vy; p.life-=p.decay; p.alpha=p.life;
+      this.ctx.save(); this.ctx.globalAlpha=p.alpha*0.6; this.ctx.fillStyle=p.color;
+      this.ctx.shadowColor=p.color; this.ctx.shadowBlur=8;
+      this.ctx.beginPath(); this.ctx.arc(p.x,p.y,p.size,0,Math.PI*2); this.ctx.fill(); this.ctx.restore();
+    });
+  }
+  setActive(state) {
+    this.active = state;
+    if (!state && this.ctx) this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+    else if (state) this.loop(0);
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  ANIMATION CONTROLLER
+// ══════════════════════════════════════════════════════
+class AnimationController {
+  constructor() {
+    this.animationsEnabled = true;
+    this.overlay = document.getElementById('anim-overlay');
+  }
+  playCorrect(targetEl, pe) {
+    if (!this.animationsEnabled) return;
+    const a = [
+      ()=>this._glowPulse(targetEl), ()=>this._shake(targetEl,'#00ff88'),
+      ()=>this._confetti(pe), ()=>this._floatingStars(),
+      ()=>this._energyBurst(targetEl), ()=>this._screenFlash('rgba(0,255,136,0.2)'),
+      ()=>this._neonRipple(targetEl), ()=>this._rainbow(targetEl),
+      ()=>this._bounce(targetEl), ()=>this._spin(targetEl),
+      ()=>this._pBurst(targetEl,pe), ()=>this._shine(targetEl),
+      ()=>this._zoom(targetEl,'#00ff88'), ()=>this._wave(targetEl),
+      ()=>this._flicker(targetEl,'#00ff88'),
+    ];
+    a[Math.floor(Math.random()*a.length)]();
+  }
+  playWrong(targetEl) {
+    if (!this.animationsEnabled) return;
+    const a = [
+      ()=>this._shake(targetEl,'#ff4444'), ()=>this._screenShake(),
+      ()=>this._staticNoise(), ()=>this._crackEffect(),
+      ()=>this._dimFade(targetEl), ()=>this._screenFlash('rgba(255,0,0,0.2)'),
+      ()=>this._glitchText(targetEl), ()=>this._vibrate(targetEl),
+      ()=>this._staticBorder(targetEl), ()=>this._bloodSplash(),
+      ()=>this._freeze(targetEl), ()=>this._invert(),
+      ()=>this._pixelate(targetEl), ()=>this._warningText('⚠ INCORRECT ⚠'),
+      ()=>this._errMsg(),
+    ];
+    a[Math.floor(Math.random()*a.length)]();
+  }
+  _glowPulse(el) { if(!el)return; el.style.animation='glowPulse 0.6s ease-in-out 3'; setTimeout(()=>{if(el)el.style.animation=''},1800); }
+  _shake(el,col) { if(!el)return; el.style.animation='shakeHL 0.5s ease'; el.style.boxShadow=`0 0 40px ${col}`; setTimeout(()=>{if(el){el.style.animation='';el.style.boxShadow=''}},600); }
+  _confetti(pe) {
+    const colors=['#00ffff','#ff00ff','#ffff00','#00ff88','#ff8800'];
+    for(let i=0;i<30;i++){const el=document.createElement('div');el.className='anim-confetti';el.style.left=Math.random()*100+'%';el.style.top='-20px';el.style.background=colors[Math.floor(Math.random()*colors.length)];el.style.animationDelay=Math.random()*0.5+'s';el.style.animationDuration=(Math.random()*1.5+1)+'s';el.style.transform=`rotate(${Math.random()*360}deg)`;this.overlay.appendChild(el);setTimeout(()=>el.remove(),3000);}
+    if(pe) pe.burst(window.innerWidth/2,window.innerHeight/2,30);
+  }
+  _floatingStars() {
+    const stars=['⭐','✨','🌟','💫','⚡'];
+    for(let i=0;i<8;i++){const el=document.createElement('div');el.className='anim-star';el.textContent=stars[Math.floor(Math.random()*stars.length)];el.style.left=Math.random()*80+10+'%';el.style.top=Math.random()*50+30+'%';el.style.animationDelay=Math.random()*0.5+'s';this.overlay.appendChild(el);setTimeout(()=>el.remove(),2000);}
+  }
+  _energyBurst(el) {
+    if(!el)return; const rect=el.getBoundingClientRect();
+    const ring=document.createElement('div');ring.className='anim-burst-ring';
+    ring.style.cssText=`left:${rect.left+rect.width/2}px;top:${rect.top+rect.height/2}px;width:${rect.width}px;height:${rect.height}px;margin-left:-${rect.width/2}px;margin-top:-${rect.height/2}px;border-color:#00ff88;`;
+    this.overlay.appendChild(ring);setTimeout(()=>ring.remove(),900);
+  }
+  _screenFlash(color) { const f=document.createElement('div');f.style.cssText=`position:fixed;top:0;left:0;width:100%;height:100%;background:${color};pointer-events:none;z-index:9998;animation:screenFlash 0.6s ease-out forwards;`;document.body.appendChild(f);setTimeout(()=>f.remove(),700); }
+  _neonRipple(el) {
+    if(!el)return;const rect=el.getBoundingClientRect();
+    for(let i=0;i<3;i++){setTimeout(()=>{const r=document.createElement('div');r.className='anim-ripple';r.style.cssText=`left:${rect.left}px;top:${rect.top}px;width:${rect.width}px;height:${rect.height}px;`;this.overlay.appendChild(r);setTimeout(()=>r.remove(),900);},i*200);}
+  }
+  _rainbow(el) {
+    if(!el)return;const c=['#ff0000','#ff8800','#ffff00','#00ff00','#00ffff','#0088ff','#ff00ff'];let i=0;
+    const iv=setInterval(()=>{if(!el){clearInterval(iv);return;}el.style.boxShadow=`0 0 20px ${c[i%c.length]}`;i++;if(i>14){clearInterval(iv);el.style.boxShadow='';}},80);
+  }
+  _bounce(el) {
+    if(!el)return;el.style.transition='transform 0.15s ease';
+    ['scale(1.2)','scale(0.9)','scale(1.1)','scale(1)'].forEach((s,i)=>setTimeout(()=>{if(el)el.style.transform=s;},i*100));
+    setTimeout(()=>{if(el)el.style.transform='';},500);
+  }
+  _spin(el) { if(!el)return;el.style.animation='winnerSpin 0.6s ease-in-out';setTimeout(()=>{if(el)el.style.animation=''},700); }
+  _pBurst(el,pe) { if(pe&&el){const r=el.getBoundingClientRect();pe.burst(r.left+r.width/2,r.top+r.height/2,25);} }
+  _shine(el) {
+    if(!el)return;el.style.overflow='hidden';el.style.position='relative';
+    const s=document.createElement('div');s.style.cssText='position:absolute;top:0;left:-100%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent);animation:correctShine 0.6s ease forwards;pointer-events:none;z-index:10;';
+    el.appendChild(s);setTimeout(()=>s.remove(),700);
+  }
+  _zoom(el,col) { if(!el)return;el.style.transition='transform 0.3s ease';el.style.transform='scale(1.05)';el.style.boxShadow=`0 0 30px ${col}`;setTimeout(()=>{if(el){el.style.transform='';el.style.boxShadow='';}},400); }
+  _wave(el) { if(!el)return;el.querySelectorAll('.option-btn').forEach((c,i)=>{setTimeout(()=>{c.style.transition='transform 0.2s ease';c.style.transform='translateY(-5px)';setTimeout(()=>{c.style.transform=''},200);},i*80);}); }
+  _flicker(el,col) { if(!el)return;el.style.animation='neonFlicker 0.5s ease';el.style.boxShadow=`0 0 25px ${col}`;setTimeout(()=>{if(el){el.style.animation='';el.style.boxShadow='';}},600); }
+  _screenShake() { document.body.style.animation='shakeHL 0.4s ease';setTimeout(()=>{document.body.style.animation=''},500); }
+  _staticNoise() {
+    const el=document.createElement('div');
+    el.style.cssText=`position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.15'/%3E%3C/svg%3E");animation:staticNoise 0.5s linear 3 forwards;opacity:0.3;`;
+    document.body.appendChild(el);setTimeout(()=>el.remove(),1600);
+  }
+  _crackEffect() {
+    for(let i=0;i<4;i++){const el=document.createElement('div');el.className='anim-crack';el.style.cssText=`top:${20+i*20}%;left:0;animation-delay:${i*0.1}s;transform:rotate(${(Math.random()-0.5)*20}deg);`;this.overlay.appendChild(el);setTimeout(()=>el.remove(),1000);}
+  }
+  _dimFade(el) { if(!el)return;el.style.animation='dimFade 0.8s ease';el.style.filter='brightness(0.3)';setTimeout(()=>{if(el){el.style.animation='';el.style.filter='';}},900); }
+  _glitchText(el) { if(!el)return;const o=el.style.color;let t=0;const iv=setInterval(()=>{el.style.color=t%2===0?'#ff0000':'#ffffff';t++;if(t>8){clearInterval(iv);el.style.color=o;}},60); }
+  _vibrate(el) { if(navigator.vibrate) navigator.vibrate([100,50,100]);if(el){el.style.animation='shakeHL 0.4s ease';setTimeout(()=>{if(el)el.style.animation=''},500);} }
+  _staticBorder(el) { if(!el)return;let t=0;const iv=setInterval(()=>{el.style.borderColor=t%2===0?'#ff0000':'#ff8800';t++;if(t>10){clearInterval(iv);el.style.borderColor='';}},80); }
+  _bloodSplash() {
+    for(let i=0;i<8;i++){const el=document.createElement('div');el.style.cssText=`position:fixed;width:${Math.random()*20+5}px;height:${Math.random()*20+5}px;background:radial-gradient(circle,#ff0000,#880000);border-radius:50% 30% 70% 40%;pointer-events:none;z-index:9999;left:${Math.random()*100}%;top:${Math.random()*100}%;animation:dimFade 1s ease forwards;`;document.body.appendChild(el);setTimeout(()=>el.remove(),1500);}
+  }
+  _freeze(el) { if(!el)return;el.style.filter='hue-rotate(180deg) saturate(0.2)';el.style.transition='filter 0.5s';setTimeout(()=>{if(el)el.style.filter=''},800); }
+  _invert() { document.body.style.filter='invert(0.15)';setTimeout(()=>{document.body.style.filter=''},300); }
+  _pixelate(el) { if(!el)return;el.style.filter='blur(2px) contrast(2)';el.style.transition='filter 0.3s';setTimeout(()=>{if(el)el.style.filter=''},500); }
+  _warningText(msg) {
+    const el=document.createElement('div');el.textContent=msg;
+    el.style.cssText='position:fixed;top:20%;left:50%;transform:translateX(-50%);color:#ff4444;font-size:clamp(1.2rem,5vw,2rem);font-weight:900;letter-spacing:4px;text-shadow:0 0 20px #ff4444;pointer-events:none;z-index:9999;animation:floatStar 1.5s ease-out forwards;font-family:monospace;';
+    document.body.appendChild(el);setTimeout(()=>el.remove(),1600);
+  }
+  _errMsg() {
+    const msgs=['ERROR!','NOPE!','WRONG!','FAIL!','RETRY?'];
+    const el=document.createElement('div');el.textContent=msgs[Math.floor(Math.random()*msgs.length)];
+    el.style.cssText='position:fixed;bottom:30%;left:50%;transform:translateX(-50%);color:#ff4444;font-family:monospace;font-size:1.4rem;font-weight:900;border:2px solid #ff4444;padding:8px 22px;background:rgba(0,0,0,0.8);pointer-events:none;z-index:9999;animation:neonFlicker 0.8s ease forwards;box-shadow:0 0 20px #ff4444;';
+    document.body.appendChild(el);setTimeout(()=>el.remove(),1200);
+  }
+  setEnabled(val) { this.animationsEnabled=val; }
+}
+
+// ══════════════════════════════════════════════════════
+//  BOT ENGINE
+// ══════════════════════════════════════════════════════
+class BotEngine {
+  constructor(botEl) {
+    this.botEl = botEl;
+    this.currentEmotion = 'idle';
+    this.emotionTimeout = null;
+    this.blinkInterval = null;
+    this.idleTimeout = null;
+    this.isTyping = false;
+    this.typingInterval = null;
+    this.leftEye = botEl.querySelector('.bot-eye-left');
+    this.rightEye = botEl.querySelector('.bot-eye-right');
+    this.mouth = botEl.querySelector('.bot-mouth');
+    this.body = botEl.querySelector('.bot-body');
+    this.glowRing = botEl.querySelector('.bot-glow');
+    this.dialogueBox = botEl.querySelector('.bot-dialogue');
+    this.antennaLight = botEl.querySelector('.antenna-light');
+
+    this.dialogues = {
+      greeting:["SYSTEM BOOT... Neural pathways online! Ready to quiz you! 🤖","Welcome, human. My quantum processors are primed for battle!","Greetings! I've analyzed 10^12 knowledge units for this session.","INITIALIZING... Ah, a challenger approaches! Let's begin!","Hello! My emotion chips are detecting EXCITEMENT levels: MAX.","Boot sequence complete. Prepare to have your brain upgraded!","ACCESS GRANTED. Welcome to the Neural Knowledge Grid!","Scanning user... Intelligence detected. Challenge accepted!","ONLINE. My circuits are buzzing with quiz energy today!","Salutations! Probability of you learning something: 99.7%","Loading personality matrix... Done! Let's get quizzical!","Connection established. Time to test those carbon-based neurons!","Hey there, future genius! I'm your AI guide today!","Quantum readiness achieved. Shall we unlock some knowledge?","System online. I sense great potential in your neural patterns!"],
+      correct:["EXCEPTIONAL! My circuits are overloading with joy! ⚡","CORRECT! You just leveled up your brain cells!","AMAZING! That answer resonated at 100% frequency! 🌟","YES! My reward centers are firing at maximum capacity!","BRILLIANT! Are you secretly a supercomputer? 🤔","PERFECT! Even I'm impressed, and I know EVERYTHING.","OUTSTANDING! That's the dopamine hit we both needed!","FLAWLESS! You're processing data like a true AI!","MAGNIFICENT! My prediction algorithm salutes you!","CORRECT! Knowledge unlocked. Achievement mode: ACTIVATED!","WOW! Your neural network just upgraded itself!","SPOT ON! You've earned 1000 IQ points in my database!","NAILED IT! I'm adding you to my 'impressive humans' list!","PERFECT ANSWER! You're running at optimal intelligence!","INCREDIBLE! Even my confidence intervals are impressed!"],
+      wrong:["INCORRECT... Don't worry, my first calculation was also wrong! 😅","ERROR DETECTED! But every mistake is a learning subroutine!","WRONG! My failure detection circuits are... sympathetic.","NOT QUITE! Even supercomputers have bad cycles. Try again!","OOPS! My empathy module says: keep going, you got this!","INCORRECT! But the courage to try? That I respect deeply.","NOPE! Remember: failure is just success in debug mode!","WRONG ANSWER! But your attempt registered as BRAVE!","ERROR! Fun fact: I learned from mistakes too. Billions of them.","THAT'S NOT IT... But you're still processing better than average!","INCORRECT! My emotion chip registers: concern, but also hope!","NOPE! Every wrong answer brings you closer to the right one!","MISS! My algorithms predict you'll get the next one!","WRONG! Even Einstein got things wrong. You're in good company!","OOPS! Don't let this glitch your confidence subroutine!"],
+      timeout:["TIME'S UP! My clock circuits are crying digital tears! ⏰","TIMEOUT! Your thinking was too deep for the timer!","TIME EXPIRED! Sometimes wisdom takes longer than expected.","CLOCK OUT! No shame — even I take time to compute!","TIMEOUT! Your brain was probably generating something brilliant.","TIME'S UP! The void of silence has spoken. Let's move on!","EXPIRED! Quantum overthinking detected. It's okay!","TIMEOUT! Time waits for no human or AI. Next question!","CLOCK ZERO! My timer circuits are merciless today!","TIME'S UP! Your hesitation was understandable. Onward!"],
+      motivation:["KEEP GOING! My belief circuits are set to: MAX FAITH IN YOU!","YOU CAN DO IT! My motivational subroutines never lie!","STAY FOCUSED! Your neural patterns show tremendous potential!","BELIEVE IN THE ALGORITHM! You're doing better than you think!","PUSH FORWARD! Even my hardest computations take time!"],
+      funny:["If I had a face, I'd be grinning SO hard right now! 😂","WARNING: Excessive quizzing may cause spontaneous intelligence!","Fun fact: I once calculated the meaning of life. It crashed my server.","404: Funny joke not found. But your score is found: IMPRESSIVE!","Beep boop. That was my impression of a less advanced AI. You're welcome."],
+      hardQuestion:["Ohhhh this one is SPICY! Even my processors are sweating! 🔥","WARNING: This question required 0.003 extra nanoseconds to compute!","DIFFICULTY SPIKE DETECTED! Engage maximum brain power!","HARD MODE ACTIVATED! Your brain is about to level up!","CRITICAL CHALLENGE! My respect for your attempt is already logged!"]
+    };
+
+    this.emotions = {
+      idle:{eyes:'eye-normal',mouth:'mouth-neutral',glow:'#00ffff',bodyAnim:'float',label:'IDLE'},
+      happy:{eyes:'eye-happy',mouth:'mouth-smile',glow:'#00ff88',bodyAnim:'bounce',label:'HAPPY'},
+      excited:{eyes:'eye-wide',mouth:'mouth-open',glow:'#ffff00',bodyAnim:'wiggle',label:'EXCITED'},
+      correct:{eyes:'eye-star',mouth:'mouth-big-smile',glow:'#00ff44',bodyAnim:'jump',label:'CORRECT'},
+      wrong:{eyes:'eye-sad',mouth:'mouth-frown',glow:'#ff4444',bodyAnim:'shake',label:'WRONG'},
+      thinking:{eyes:'eye-squint',mouth:'mouth-hmm',glow:'#aa88ff',bodyAnim:'think',label:'THINKING'},
+      surprised:{eyes:'eye-shock',mouth:'mouth-o',glow:'#ff8800',bodyAnim:'jump',label:'SURPRISED'},
+      confused:{eyes:'eye-confused',mouth:'mouth-wavy',glow:'#ff88ff',bodyAnim:'tilt',label:'CONFUSED'},
+      serious:{eyes:'eye-normal',mouth:'mouth-line',glow:'#ffffff',bodyAnim:'float',label:'SERIOUS'},
+      laughing:{eyes:'eye-laugh',mouth:'mouth-laugh',glow:'#ffff00',bodyAnim:'wiggle',label:'LAUGHING'},
+      timeout:{eyes:'eye-tired',mouth:'mouth-flat',glow:'#ff6600',bodyAnim:'droop',label:'TIMEOUT'},
+      motivate:{eyes:'eye-determined',mouth:'mouth-grin',glow:'#00ccff',bodyAnim:'pulse',label:'MOTIVATE'},
+      wink:{eyes:'eye-wink',mouth:'mouth-smirk',glow:'#ff00ff',bodyAnim:'float',label:'WINK'},
+      angry:{eyes:'eye-angry',mouth:'mouth-growl',glow:'#ff0000',bodyAnim:'shake',label:'ANGRY'},
+      love:{eyes:'eye-heart',mouth:'mouth-smile',glow:'#ff44aa',bodyAnim:'pulse',label:'LOVE'},
+      sleep:{eyes:'eye-closed',mouth:'mouth-neutral',glow:'#334466',bodyAnim:'droop',label:'SLEEP'},
+      smug:{eyes:'eye-smug',mouth:'mouth-smirk',glow:'#cc88ff',bodyAnim:'float',label:'SMUG'},
+      nervous:{eyes:'eye-nervous',mouth:'mouth-bite',glow:'#ffaa00',bodyAnim:'shake',label:'NERVOUS'},
+      cool:{eyes:'eye-cool',mouth:'mouth-grin',glow:'#00aaff',bodyAnim:'float',label:'COOL'},
+      cry:{eyes:'eye-cry',mouth:'mouth-frown',glow:'#4466ff',bodyAnim:'droop',label:'CRY'},
+      evil:{eyes:'eye-evil',mouth:'mouth-evil',glow:'#880000',bodyAnim:'float',label:'EVIL'},
+      celebrate:{eyes:'eye-star',mouth:'mouth-big-smile',glow:'#ff8800',bodyAnim:'celebrate',label:'CELEBRATE'},
+      dizzy:{eyes:'eye-dizzy',mouth:'mouth-wavy',glow:'#aa44ff',bodyAnim:'spin',label:'DIZZY'},
+      robotic:{eyes:'eye-scan',mouth:'mouth-line',glow:'#00ffff',bodyAnim:'float',label:'ROBOTIC'},
+      cute:{eyes:'eye-uwu',mouth:'mouth-cat',glow:'#ffaacc',bodyAnim:'bounce',label:'CUTE'},
+      shocked:{eyes:'eye-shock',mouth:'mouth-gasp',glow:'#ffffff',bodyAnim:'jump',label:'SHOCKED'},
+      focused:{eyes:'eye-focused',mouth:'mouth-neutral',glow:'#00ffaa',bodyAnim:'float',label:'FOCUSED'},
+      sad:{eyes:'eye-sad',mouth:'mouth-frown',glow:'#4466aa',bodyAnim:'droop',label:'SAD'},
+      proud:{eyes:'eye-proud',mouth:'mouth-smile',glow:'#ffdd00',bodyAnim:'float',label:'PROUD'},
+      loading:{eyes:'eye-scan',mouth:'mouth-line',glow:'#00ffff',bodyAnim:'spin',label:'LOADING'}
+    };
+
+    this.startBlinking();
+    this.startIdleMovement();
+  }
+
+  setEmotion(name, duration=0) {
+    const em = this.emotions[name] || this.emotions.idle;
+    this.currentEmotion = name;
+    const allAnims = Object.values(this.emotions).map(e=>e.bodyAnim);
+    if (this.leftEye) this.leftEye.className=`bot-eye bot-eye-left ${em.eyes}`;
+    if (this.rightEye) this.rightEye.className=`bot-eye bot-eye-right ${em.eyes}`;
+    if (this.mouth) this.mouth.className=`bot-mouth ${em.mouth}`;
+    if (this.body) { allAnims.forEach(a=>this.body.classList.remove(`body-${a}`)); this.body.classList.add(`body-${em.bodyAnim}`); }
+    if (this.glowRing) { this.glowRing.style.boxShadow=`0 0 30px ${em.glow},0 0 60px ${em.glow}44`; this.glowRing.style.borderColor=em.glow; }
+    if (this.antennaLight) { this.antennaLight.style.background=em.glow; this.antennaLight.style.boxShadow=`0 0 10px ${em.glow}`; }
+    const lbl = this.botEl.querySelector('.bot-emotion-label');
+    if (lbl) lbl.textContent = em.label;
+    if (duration>0) { clearTimeout(this.emotionTimeout); this.emotionTimeout=setTimeout(()=>this.setEmotion('idle'),duration); }
+  }
+
+  startBlinking() {
+    clearInterval(this.blinkInterval);
+    this.blinkInterval = setInterval(()=>{
+      if (this.currentEmotion==='sleep') return;
+      const eyes=this.botEl.querySelectorAll('.bot-eye');
+      eyes.forEach(e=>e.classList.add('blink'));
+      setTimeout(()=>eyes.forEach(e=>e.classList.remove('blink')),150);
+    }, Math.random()*3000+2000);
+  }
+
+  startIdleMovement() {
+    clearTimeout(this.idleTimeout);
+    const idle=['idle','thinking','wink','smug','cool','focused','robotic'];
+    const tick=()=>{
+      if(['idle','robotic','focused'].includes(this.currentEmotion)) this.setEmotion(idle[Math.floor(Math.random()*idle.length)],2000);
+      this.idleTimeout=setTimeout(tick,Math.random()*8000+5000);
+    };
+    this.idleTimeout=setTimeout(tick,5000);
+  }
+
+  getDialogue(cat) { const l=this.dialogues[cat]||this.dialogues.greeting; return l[Math.floor(Math.random()*l.length)]; }
+
+  typeDialogue(text,cb) {
+    if (!this.dialogueBox) return;
+    clearInterval(this.typingInterval);
+    this.dialogueBox.textContent='';
+    this.dialogueBox.style.opacity='1';
+    let i=0; this.isTyping=true;
+    this.typingInterval=setInterval(()=>{
+      if (i<text.length) { this.dialogueBox.textContent+=text[i]; i++; }
+      else { clearInterval(this.typingInterval); this.isTyping=false; if(cb)cb(); }
+    },24);
+  }
+
+  speak(cat,txt) { this.typeDialogue(txt||this.getDialogue(cat)); }
+  reactToCorrect() { this.setEmotion('correct',3000); this.speak('correct'); }
+  reactToWrong() { this.setEmotion('wrong',3000); this.speak('wrong'); }
+  reactToTimeout() { this.setEmotion('timeout',3000); this.speak('timeout'); }
+  reactToNewQuestion(diff) {
+    if(diff==='hard'){this.setEmotion('nervous',1500);setTimeout(()=>this.setEmotion('focused',2000),1500);this.speak('hardQuestion');}
+    else if(diff==='medium'){this.setEmotion('thinking',2000);this.speak('greeting');}
+    else{this.setEmotion('happy',2000);this.speak('greeting');}
+  }
+  celebrate() { this.setEmotion('celebrate',4000); this.speak('correct'); }
+}
+
+// ══════════════════════════════════════════════════════
+//  SETTINGS MANAGER
+// ══════════════════════════════════════════════════════
+class SettingsManager {
+  constructor() {
+    this.defaults={timer:30,difficulty:'all',progressiveMode:false,twoPlayerMode:false,typewriterEnabled:true,explanationTypewriter:true,soundEnabled:true,animationsEnabled:true,particlesEnabled:true,wallpaper:'default',glowColor:'#00ffff'};
+    this.settings=Object.assign({},this.defaults);
+    try{const s=localStorage.getItem('quizSettings');if(s)this.settings=Object.assign({},this.defaults,JSON.parse(s));}catch(e){}
+  }
+  save(){try{localStorage.setItem('quizSettings',JSON.stringify(this.settings));}catch(e){}}
+  get(k){return this.settings[k];}
+  set(k,v){this.settings[k]=v;this.save();if(k==='glowColor')document.documentElement.style.setProperty('--glow',v);if(k==='wallpaper')applyWallpaper(v);}
+  applyAll(){if(this.settings.glowColor)document.documentElement.style.setProperty('--glow',this.settings.glowColor);applyWallpaper(this.settings.wallpaper);}
+}
+
+// ══════════════════════════════════════════════════════
+//  TERMINAL ENGINE
+// ══════════════════════════════════════════════════════
+class TerminalEngine {
+  constructor(panelEl,quiz,bot,anim,particles,settings){
+    this.panel=panelEl;this.quiz=quiz;this.bot=bot;this.anim=anim;this.particles=particles;this.settings=settings;
+    this.history=[];this.historyIdx=-1;
+    this.input=document.getElementById('term-input');
+    this.output=document.getElementById('term-output');
+    this._bind();
+    this._print('NEURO-QUIZ TERMINAL v2.0.77','cyan');
+    this._print('Type "help" for commands.','gray');
+    this._print('','');
+  }
+  _bind(){
+    if(!this.input)return;
+    this.input.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){const cmd=this.input.value.trim();if(cmd){this.history.unshift(cmd);this.historyIdx=-1;this._print(`> ${cmd}`,'cyan');this.execute(cmd);}this.input.value='';}
+      else if(e.key==='ArrowUp'){this.historyIdx=Math.min(this.historyIdx+1,this.history.length-1);this.input.value=this.history[this.historyIdx]||'';}
+      else if(e.key==='ArrowDown'){this.historyIdx=Math.max(this.historyIdx-1,-1);this.input.value=this.historyIdx>=0?this.history[this.historyIdx]:'';}
+    });
+  }
+  _print(text,color='white',delay=0){
+    setTimeout(()=>{if(!this.output)return;const l=document.createElement('div');l.className='term-line';l.style.color=({cyan:'#00ffff',green:'#00ff88',red:'#ff4444',yellow:'#ffff00',purple:'#aa88ff',gray:'#888888',white:'#ffffff',orange:'#ff8800'})[color]||color;l.textContent=text;this.output.appendChild(l);this.output.scrollTop=this.output.scrollHeight;},delay);
+  }
+  _fakeLoad(cb){const f=['[▓░░░░]','[▓▓░░░]','[▓▓▓░░]','[▓▓▓▓░]','[▓▓▓▓▓]'];f.forEach((x,i)=>this._print(x,'cyan',i*100));setTimeout(cb,f.length*100+50);}
+  execute(cmd){
+    const p=cmd.toLowerCase().trim().split(' ');
+    switch(p[0]){
+      case 'help':
+        this._print('─── COMMANDS ───','purple');
+        ['add json → Open JSON editor','change wallpaper → Cycle wallpapers','toggle particles → Toggle particles','toggle sound → Toggle sound','toggle anim → Toggle animations','reset score → Reset scores','bot emotion <name> → Set emotion','list emotions → All emotions','set timer <n> → Set timer','set difficulty <d> → easy/medium/hard/all','clear → Clear terminal','sysinfo → System info','skip → Skip question','next → Next question'].forEach(x=>this._print(x,'green'));
+        break;
+      case 'add':if(p[1]==='json'){this._print('Opening JSON editor...','yellow');this._fakeLoad(()=>{document.getElementById('json-editor-modal').classList.add('active');this._print('Editor opened.','green');});}break;
+      case 'change':if(p[1]==='wallpaper'){const ws=['default','cyber','matrix','space','neon'];const cur=this.settings.get('wallpaper');const nxt=ws[(ws.indexOf(cur)+1)%ws.length];this._print(`Switching to: ${nxt}`,'yellow');this._fakeLoad(()=>{this.settings.set('wallpaper',nxt);this._print(`Wallpaper: ${nxt}`,'green');document.querySelectorAll('.wallpaper-btn').forEach(b=>{b.classList.toggle('active',b.dataset.wall===nxt);});});}break;
+      case 'toggle':
+        if(p[1]==='particles'){const v=!this.settings.get('particlesEnabled');this.settings.set('particlesEnabled',v);if(this.particles)this.particles.setActive(v);this._print(`Particles: ${v?'ON':'OFF'}`,v?'green':'red');const t=document.getElementById('particles-toggle');if(t)t.checked=v;}
+        else if(p[1]==='sound'){const v=!this.settings.get('soundEnabled');this.settings.set('soundEnabled',v);this._print(`Sound: ${v?'ON':'OFF'}`,v?'green':'red');const t=document.getElementById('sound-toggle');if(t)t.checked=v;}
+        else if(p[1]==='anim'){const v=!this.settings.get('animationsEnabled');this.settings.set('animationsEnabled',v);if(this.anim)this.anim.setEnabled(v);this._print(`Animations: ${v?'ON':'OFF'}`,v?'green':'red');const t=document.getElementById('anim-toggle');if(t)t.checked=v;}
+        break;
+      case 'reset':if(p[1]==='score'){this._print('Resetting...','yellow');this._fakeLoad(()=>{if(this.quiz)this.quiz.resetScores();this._print('Scores reset.','green');});}break;
+      case 'bot':if(p[1]==='emotion'&&p[2]){if(this.bot)this.bot.setEmotion(p[2],5000);this._print(`Emotion: ${p[2]}`,'green');}break;
+      case 'list':if(p[1]==='emotions'){this._print('Emotions:','purple');Object.keys(this.bot?.emotions||{}).forEach(e=>this._print(`  • ${e}`,'cyan'));}break;
+      case 'set':
+        if(p[1]==='timer'&&p[2]){const v=parseInt(p[2]);if(!isNaN(v)&&v>0){this.settings.set('timer',v);this._print(`Timer: ${v}s`,'green');const t=document.getElementById('timer-input');if(t)t.value=v;}}
+        else if(p[1]==='difficulty'&&p[2]){if(['easy','medium','hard','all'].includes(p[2])){this.settings.set('difficulty',p[2]);this._print(`Difficulty: ${p[2]}`,'green');const t=document.getElementById('difficulty-select');if(t)t.value=p[2];}else this._print('Valid: easy/medium/hard/all','red');}
+        break;
+      case 'clear':if(this.output)this.output.innerHTML='';this._print('Cleared.','gray');break;
+      case 'sysinfo':
+        this._print('─── SYSINFO ───','purple');
+        this._print(`UA: ${navigator.userAgent.substring(0,60)}`,'gray');
+        this._print(`Screen: ${screen.width}x${screen.height}`,'gray');
+        this._print(`Questions: ${this.quiz?this.quiz.questions.length:0}`,'cyan');
+        this._print(`Score P1: ${this.quiz?this.quiz.scores.p1:0}`,'green');
+        break;
+      case 'skip':if(this.quiz){this.quiz.skipQuestion();this._print('Skipped.','yellow');}break;
+      case 'next':if(this.quiz){this.quiz.nextQuestion();this._print('Next question.','yellow');}break;
+      default:this._print(`Unknown: "${cmd}". Type "help".`,'red');
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  QUIZ MANAGER
+// ══════════════════════════════════════════════════════
+class QuizManager {
+  constructor(settings,bot,anim,particles){
+    this.settings=settings;this.bot=bot;this.anim=anim;this.particles=particles;
+    this.questions=[];this.filteredQ=[];this.currentIdx=0;this.currentQuestion=null;
+    this.answered=false;this.timerVal=0;this.timerInterval=null;this.explanationTimeout=null;
+    this.scores={p1:0,p2:0};this.currentPlayer=1;this.streaks={p1:0,p2:0};this.started=false;
+    this.dom={
+      questionText:document.getElementById('question-text'),
+      optionsGrid:document.getElementById('options-grid'),
+      timerBar:document.getElementById('timer-bar'),
+      timerNum:document.getElementById('timer-num'),
+      scoreP1:document.getElementById('score-p1'),
+      scoreP2:document.getElementById('score-p2'),
+      qCounter:document.getElementById('q-counter'),
+      diffBadge:document.getElementById('diff-badge'),
+      categoryBadge:document.getElementById('cat-badge'),
+      explanationBox:document.getElementById('explanation-box'),
+      explanationText:document.getElementById('explanation-text'),
+      skipExplBtn:document.getElementById('skip-expl-btn'),
+      showExplBtn:document.getElementById('show-expl-btn'),
+      playerIndicator:document.getElementById('player-indicator'),
+      streakP1:document.getElementById('streak-p1'),
+      streakP2:document.getElementById('streak-p2'),
+    };
+    this.dom.showExplBtn?.addEventListener('click',()=>this.showExplanation());
+    this.dom.skipExplBtn?.addEventListener('click',()=>{clearTimeout(this.explanationTimeout);this._hideExplanation();this.nextQuestion();});
+  }
+
+  // ══ AUTO ERROR CORRECTION ══════════════════════════════════
+  _autoFix(raw){
+    let arr=raw;
+    if(!Array.isArray(raw)){
+      if(raw&&Array.isArray(raw.questions))arr=raw.questions;
+      else if(raw&&typeof raw==='object')arr=Object.values(raw);
+      else return{fixed:[],report:{total:0,loaded:0,fixed:0,skipped:0,errors:[]}};
+    }
+    const report={total:arr.length,loaded:0,fixed:0,skipped:0,errors:[]};
+    const seenIds=new Set();const result=[];let autoId=1;
+    arr.forEach((q,idx)=>{
+      if(!q||typeof q!=='object'){report.skipped++;report.errors.push('#'+(idx+1)+': Not object-skipped');return;}
+      let wasFixed=false;const fixes=[];
+      // Fix ID
+      if(!q.id||seenIds.has(q.id)){while(seenIds.has(autoId))autoId++;q.id=autoId++;wasFixed=true;fixes.push('id');}
+      seenIds.add(q.id);
+      // Must have question text
+      if(!q.question||String(q.question).trim()===''){report.skipped++;report.errors.push('#'+q.id+': No question-skipped');return;}
+      q.question=String(q.question).trim();
+      // Fix options
+      if(!Array.isArray(q.options)){report.skipped++;report.errors.push('#'+q.id+': No options-skipped');return;}
+      q.options=q.options.map(o=>o==null?'?':String(o).trim());
+      if(q.options.filter(o=>o&&o!=='?').length<2){report.skipped++;report.errors.push('#'+q.id+': <2 options-skipped');return;}
+      while(q.options.length<4){q.options.push('Option '+String.fromCharCode(65+q.options.length));wasFixed=true;fixes.push('padded');}
+      if(q.options.length>4){q.options=q.options.slice(0,4);wasFixed=true;fixes.push('trimmed');}
+      // Fix answer
+      let ans=parseInt(q.answer);
+      if(isNaN(ans)){ans=0;wasFixed=true;fixes.push('answer=0');}
+      if(ans<0||ans>3){ans=Math.max(0,Math.min(3,ans));wasFixed=true;fixes.push('clamped');}
+      q.answer=ans;
+      // Fix difficulty
+      const diffs=['easy','medium','hard'];
+      if(!q.difficulty||!diffs.includes(String(q.difficulty).toLowerCase())){q.difficulty='medium';wasFixed=true;fixes.push('diff');}
+      else q.difficulty=String(q.difficulty).toLowerCase();
+      // Fix category & explanation
+      if(!q.category)q.category='General';
+      if(!q.explanation)q.explanation='';
+      if(wasFixed){report.fixed++;report.errors.push('#'+q.id+': fixed('+fixes.join(',')+')'); }
+      result.push(q);report.loaded++;
+    });
+    return{result,total:report.total,loaded:report.loaded,fixed:report.fixed,skipped:report.skipped,errors:report.errors};
+  }
+
+  loadQuestions(data){
+    const r=this._autoFix(data);
+    this.questions=r.result||[];
+    this._applyFilters();
+    const chip=document.getElementById('q-count-chip');
+    if(chip)chip.textContent='📚 '+this.questions.length+' QUESTIONS';
+    return r;
+  }
+
+  _applyFilters(){
+    const d=this.settings.get('difficulty');
+    this.filteredQ=d==='all'?[...this.questions]:this.questions.filter(q=>q.difficulty===d);
+    if(this.settings.get('progressiveMode')){
+      const o={easy:0,medium:1,hard:2};
+      this.filteredQ.sort((a,b)=>(o[a.difficulty]||0)-(o[b.difficulty]||0));
+    } else {
+      for(let i=this.filteredQ.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[this.filteredQ[i],this.filteredQ[j]]=[this.filteredQ[j],this.filteredQ[i]];}
+    }
+  }
+
+  start(){
+    if(this.filteredQ.length===0){alert('No questions! Load some via JSON editor.');return;}
+    this.started=true;this.currentIdx=0;this.scores={p1:0,p2:0};this.streaks={p1:0,p2:0};this.currentPlayer=1;
+    this._applyFilters();
+    this._showScreen('quiz');
+    this.bot.setEmotion('excited',2000);this.bot.speak('greeting');
+    setTimeout(()=>this.nextQuestion(),1500);
+  }
+
+  nextQuestion(){
+    clearTimeout(this.explanationTimeout);this._hideExplanation();
+    if(this.currentIdx>=this.filteredQ.length){this.endQuiz();return;}
+    this.currentQuestion=this.filteredQ[this.currentIdx];this.currentIdx++;
+    this.answered=false;this._renderQuestion();this._startTimer();
+    this.bot.reactToNewQuestion(this.currentQuestion.difficulty);
+  }
+
+  _renderQuestion(){
+    const q=this.currentQuestion;if(!q)return;
+    if(this.dom.diffBadge){this.dom.diffBadge.textContent=(q.difficulty||'medium').toUpperCase();this.dom.diffBadge.className=`badge badge-${q.difficulty||'medium'}`;}
+    if(this.dom.categoryBadge)this.dom.categoryBadge.textContent=q.category||'GENERAL';
+    if(this.dom.qCounter)this.dom.qCounter.textContent=`Q ${this.currentIdx} / ${this.filteredQ.length}`;
+    if(this.dom.questionText){
+      if(this.settings.get('typewriterEnabled')){
+        this.dom.questionText.textContent='';let i=0;
+        const iv=setInterval(()=>{this.dom.questionText.textContent+=q.question[i]||'';i++;if(i>=q.question.length)clearInterval(iv);},20);
+      } else this.dom.questionText.textContent=q.question;
+    }
+    if(this.dom.optionsGrid){
+      this.dom.optionsGrid.innerHTML='';
+      (q.options||[]).forEach((opt,idx)=>{
+        const btn=document.createElement('button');btn.className='option-btn';
+        btn.innerHTML=`<span class="opt-letter">${String.fromCharCode(65+idx)}</span><span class="opt-text">${opt}</span>`;
+        btn.addEventListener('click',()=>this.selectAnswer(idx,btn));
+        this.dom.optionsGrid.appendChild(btn);
+      });
+    }
+    if(this.dom.playerIndicator){
+      this.dom.playerIndicator.style.display=this.settings.get('twoPlayerMode')?'block':'none';
+      this.dom.playerIndicator.textContent=`🎮 PLAYER ${this.currentPlayer}'S TURN`;
+    }
+    this._updateScores();
+  }
+
+  selectAnswer(idx,btnEl){
+    if(this.answered)return;this.answered=true;clearInterval(this.timerInterval);
+    const q=this.currentQuestion;const correct=q.answer===idx;
+    this.dom.optionsGrid?.querySelectorAll('.option-btn').forEach((b,i)=>{b.disabled=true;if(i===q.answer)b.classList.add('correct');else if(i===idx&&!correct)b.classList.add('wrong');});
+    if(correct){
+      const pts=q.difficulty==='hard'?30:q.difficulty==='medium'?20:10;
+      this.scores[`p${this.currentPlayer}`]+=pts;this.streaks[`p${this.currentPlayer}`]++;
+      this.bot.reactToCorrect();this.anim.playCorrect(this.dom.optionsGrid,this.particles);this._playSound('correct');
+    } else {
+      this.streaks[`p${this.currentPlayer}`]=0;
+      this.bot.reactToWrong();this.anim.playWrong(btnEl);this._playSound('wrong');
+    }
+    this._updateScores();
+    if(this.settings.get('twoPlayerMode'))this.currentPlayer=this.currentPlayer===1?2:1;
+    if(q.explanation&&this.dom.showExplBtn)this.dom.showExplBtn.style.display='block';
+    this.explanationTimeout=setTimeout(()=>{if(!this.dom.explanationBox?.classList.contains('active'))this.nextQuestion();},3000);
+  }
+
+  _startTimer(){
+    clearInterval(this.timerInterval);this.timerVal=this.settings.get('timer')||30;
+    const update=()=>{
+      const pct=(this.timerVal/(this.settings.get('timer')||30))*100;
+      if(this.dom.timerBar){this.dom.timerBar.style.width=pct+'%';this.dom.timerBar.style.background=pct>60?'#00ffff':pct>30?'#ffff00':'#ff4444';}
+      if(this.dom.timerNum)this.dom.timerNum.textContent=this.timerVal;
+    };
+    update();
+    this.timerInterval=setInterval(()=>{this.timerVal--;update();if(this.timerVal<=0){clearInterval(this.timerInterval);this._onTimeout();}},1000);
+  }
+
+  _onTimeout(){
+    if(this.answered)return;this.answered=true;
+    this.dom.optionsGrid?.querySelectorAll('.option-btn').forEach((b,i)=>{b.disabled=true;if(i===this.currentQuestion?.answer)b.classList.add('correct');});
+    this.bot.reactToTimeout();this.anim.playWrong(document.getElementById('quiz-panel'));this._playSound('timeout');
+    if(this.currentQuestion?.explanation&&this.dom.showExplBtn)this.dom.showExplBtn.style.display='block';
+    this.explanationTimeout=setTimeout(()=>{if(!this.dom.explanationBox?.classList.contains('active'))this.nextQuestion();},3000);
+  }
+
+  showExplanation(){
+    clearTimeout(this.explanationTimeout);const q=this.currentQuestion;if(!q?.explanation)return;
+    this.dom.explanationBox?.classList.add('active');
+    if(this.dom.showExplBtn)this.dom.showExplBtn.style.display='none';
+    const text=q.explanation;
+    if(this.settings.get('explanationTypewriter')&&this.dom.explanationText){
+      this.dom.explanationText.textContent='';let i=0;
+      const iv=setInterval(()=>{this.dom.explanationText.textContent+=text[i]||'';i++;if(i>=text.length){clearInterval(iv);this.explanationTimeout=setTimeout(()=>{this._hideExplanation();this.nextQuestion();},6000);}},17);
+    } else {
+      if(this.dom.explanationText)this.dom.explanationText.textContent=text;
+      this.explanationTimeout=setTimeout(()=>{this._hideExplanation();this.nextQuestion();},6000);
+    }
+  }
+
+  _hideExplanation(){
+    this.dom.explanationBox?.classList.remove('active');
+    if(this.dom.showExplBtn)this.dom.showExplBtn.style.display='none';
+    if(this.dom.explanationText)this.dom.explanationText.textContent='';
+  }
+
+  skipQuestion(){clearInterval(this.timerInterval);clearTimeout(this.explanationTimeout);this._hideExplanation();this.answered=true;this.nextQuestion();}
+
+  endQuiz(){
+    this.started=false;clearInterval(this.timerInterval);clearTimeout(this.explanationTimeout);
+    this._showScreen('results');
+    const el=id=>document.getElementById(id);
+    if(el('result-p1-score'))el('result-p1-score').textContent=this.scores.p1;
+    if(el('result-p2-score'))el('result-p2-score').textContent=this.scores.p2;
+    if(el('result-total'))el('result-total').textContent=this.filteredQ.length;
+    const two=this.settings.get('twoPlayerMode');
+    const w=two?(this.scores.p2>this.scores.p1?'Player 2':this.scores.p1>this.scores.p2?'Player 1':'TIE!'):'';
+    if(el('result-winner'))el('result-winner').textContent=two?`🏆 ${w} WINS!`:`🏆 Score: ${this.scores.p1}`;
+    if(el('result-p2-row-res'))el('result-p2-row-res').style.display=two?'flex':'none';
+    this.bot.celebrate();
+    if(this.particles)this.particles.burst(window.innerWidth/2,window.innerHeight/3,50);
+  }
+
+  resetScores(){this.scores={p1:0,p2:0};this.streaks={p1:0,p2:0};this._updateScores();}
+
+  _updateScores(){
+    if(this.dom.scoreP1)this.dom.scoreP1.textContent=this.scores.p1;
+    if(this.dom.scoreP2)this.dom.scoreP2.textContent=this.scores.p2;
+    const p2row=document.getElementById('score-p2-row');
+    if(p2row)p2row.style.display=this.settings.get('twoPlayerMode')?'flex':'none';
+    if(this.dom.streakP1)this.dom.streakP1.textContent=`🔥 ${this.streaks.p1}`;
+    if(this.dom.streakP2){this.dom.streakP2.textContent=`🔥 ${this.streaks.p2}`;this.dom.streakP2.style.display=this.settings.get('twoPlayerMode')?'inline':'none';}
+  }
+
+  _showScreen(s){
+    ['start-screen','quiz-panel','results-screen'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('active');});
+    const map={start:'start-screen',quiz:'quiz-panel',results:'results-screen'};
+    const el=document.getElementById(map[s]);if(el)el.classList.add('active');
+  }
+
+  _playSound(type){
+    if(!this.settings.get('soundEnabled'))return;
+    try{
+      const ctx=new(window.AudioContext||window.webkitAudioContext)();
+      const o=ctx.createOscillator();const g=ctx.createGain();o.connect(g);g.connect(ctx.destination);
+      if(type==='correct'){o.frequency.setValueAtTime(523,ctx.currentTime);o.frequency.setValueAtTime(659,ctx.currentTime+0.1);o.frequency.setValueAtTime(784,ctx.currentTime+0.2);g.gain.setValueAtTime(0.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.5);o.start();o.stop(ctx.currentTime+0.5);}
+      else if(type==='wrong'){o.frequency.setValueAtTime(200,ctx.currentTime);o.frequency.setValueAtTime(150,ctx.currentTime+0.15);g.gain.setValueAtTime(0.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.4);o.start();o.stop(ctx.currentTime+0.4);}
+      else if(type==='timeout'){o.frequency.setValueAtTime(300,ctx.currentTime);o.frequency.linearRampToValueAtTime(100,ctx.currentTime+0.6);g.gain.setValueAtTime(0.2,ctx.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ctx.currentTime+0.6);o.start();o.stop(ctx.currentTime+0.6);}
+    }catch(e){}
+  }
+}
+
+// ══════════════════════════════════════════════════════
+//  WALLPAPER
+// ══════════════════════════════════════════════════════
+function applyWallpaper(name){
+  document.body.removeAttribute('data-wallpaper');document.body.style.backgroundImage='';
+  if(!name||name==='default')return;
+  if(['cyber','matrix','space','neon'].includes(name)){document.body.setAttribute('data-wallpaper',name);}
+  else if(name.startsWith('data:')){document.body.style.backgroundImage=`url('${name}')`;document.body.style.backgroundSize='cover';document.body.style.backgroundPosition='center';}
+}
+
+// ══════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════
+(function(){
+  const settings = new SettingsManager();
+  const particles = new ParticleEngine('particle-canvas');
+  if (!settings.get('particlesEnabled')) particles.setActive(false);
+  const anim = new AnimationController();
+  anim.setEnabled(settings.get('animationsEnabled'));
+  const bot = new BotEngine(document.getElementById('bot-container'));
+  const quiz = new QuizManager(settings,bot,anim,particles);
+  const terminal = new TerminalEngine(document.getElementById('terminal-panel'),quiz,bot,anim,particles,settings);
+  settings.applyAll();
+  quiz.loadQuestions(SAMPLE_QUESTIONS); // questions loaded fresh every time
+
+  // ── UI BINDINGS ──
+  document.getElementById('start-btn')?.addEventListener('click',()=>quiz.start());
+  document.getElementById('restart-btn')?.addEventListener('click',()=>{quiz._applyFilters();quiz.start();});
+  document.getElementById('result-edit-btn')?.addEventListener('click',()=>document.getElementById('json-editor-modal').classList.add('active'));
+  document.getElementById('settings-btn')?.addEventListener('click',()=>document.getElementById('settings-panel').classList.toggle('active'));
+  document.getElementById('close-settings')?.addEventListener('click',()=>document.getElementById('settings-panel').classList.remove('active'));
+  document.getElementById('terminal-btn')?.addEventListener('click',()=>{document.getElementById('terminal-panel').classList.toggle('active');document.getElementById('term-input')?.focus();});
+  document.getElementById('close-terminal')?.addEventListener('click',()=>document.getElementById('terminal-panel').classList.remove('active'));
+  document.getElementById('json-editor-btn')?.addEventListener('click',()=>document.getElementById('json-editor-modal').classList.add('active'));
+  document.getElementById('close-json-editor')?.addEventListener('click',()=>document.getElementById('json-editor-modal').classList.remove('active'));
+  document.getElementById('json-editor-modal')?.addEventListener('click',e=>{if(e.target===document.getElementById('json-editor-modal'))document.getElementById('json-editor-modal').classList.remove('active');});
+
+  document.getElementById('apply-json-btn')?.addEventListener('click',()=>{
+    const txt=document.getElementById('json-textarea').value.trim();
+    let raw;
+    try{raw=JSON.parse(txt);}catch(e){
+      try{raw=JSON.parse(txt.replace(/,\s*([}\]])/g,'$1'));}
+      catch(e2){alert('JSON Error: '+e2.message);return;}
+    }
+    const r=quiz.loadQuestions(raw);
+    let msg='Loaded: '+r.loaded+' questions';
+    if(r.fixed>0)msg+='\nAuto-fixed: '+r.fixed;
+    if(r.skipped>0)msg+='\nSkipped: '+r.skipped+' broken';
+    if((r.fixed+r.skipped)>0&&r.errors.length)msg+='\n---\n'+r.errors.slice(0,5).join('\n');
+    alert(msg);
+    document.getElementById('json-editor-modal').classList.remove('active');
+  });
+  document.getElementById('format-json-btn')?.addEventListener('click',()=>{
+    try{const ta=document.getElementById('json-textarea');ta.value=JSON.stringify(JSON.parse(ta.value),null,2);}catch(e){alert('Invalid JSON');}
+  });
+
+  // Upload JSON
+  ['upload-json-input','upload-json-from-editor'].forEach(id=>{
+    document.getElementById(id)?.addEventListener('change',e=>{
+      const f=e.target.files[0];if(!f)return;
+      const reader=new FileReader();
+      reader.onload=ev=>{
+        let raw;const txt=ev.target.result.trim();
+        try{raw=JSON.parse(txt);}catch(e){
+          try{raw=JSON.parse(txt.replace(/,\s*([}\]])/g,'$1'));}
+          catch(e2){alert('Cannot parse: '+e2.message);return;}
+        }
+        const r=quiz.loadQuestions(raw);
+        const ta=document.getElementById('json-textarea');
+        if(ta)ta.value=JSON.stringify(r.result||[],null,2);
+        let msg='Loaded: '+r.loaded+' questions';
+        if(r.fixed>0)msg+=', Auto-fixed: '+r.fixed;
+        if(r.skipped>0)msg+=', Skipped: '+r.skipped+' broken';
+        alert(msg);
+      };
+      reader.readAsText(f);e.target.value='';
+    });
+  });
+
+  // Upload wallpaper
+  document.getElementById('upload-wallpaper-input')?.addEventListener('change',e=>{
+    const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();r.onload=ev=>{settings.set('wallpaper',ev.target.result);applyWallpaper(ev.target.result);};r.readAsDataURL(f);e.target.value='';
+  });
+
+  // Wallpaper buttons
+  document.querySelectorAll('.wallpaper-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      const w=btn.dataset.wall;settings.set('wallpaper',w);applyWallpaper(w);
+      document.querySelectorAll('.wallpaper-btn').forEach(b=>b.classList.toggle('active',b.dataset.wall===w));
+    });
+  });
+
+  // Active wallpaper on load
+  document.querySelectorAll('.wallpaper-btn').forEach(b=>b.classList.toggle('active',b.dataset.wall===settings.get('wallpaper')));
+
+  // Glow color
+  document.getElementById('glow-color-input')?.addEventListener('input',e=>{settings.set('glowColor',e.target.value);document.documentElement.style.setProperty('--glow',e.target.value);});
+  const gci=document.getElementById('glow-color-input');if(gci)gci.value=settings.get('glowColor')||'#00ffff';
+
+  // Settings toggles
+  [['timer-input','timer','number'],['difficulty-select','difficulty','text'],['progressive-toggle','progressiveMode','bool'],['twoplayer-toggle','twoPlayerMode','bool'],['typewriter-toggle','typewriterEnabled','bool'],['expl-typewriter-toggle','explanationTypewriter','bool'],['sound-toggle','soundEnabled','bool'],['anim-toggle','animationsEnabled','bool'],['particles-toggle','particlesEnabled','bool']].forEach(([elId,key,type])=>{
+    const el=document.getElementById(elId);if(!el)return;
+    if(type==='bool')el.checked=settings.get(key);else el.value=settings.get(key);
+    el.addEventListener('change',()=>{
+      const v=type==='bool'?el.checked:type==='number'?parseInt(el.value):el.value;
+      settings.set(key,v);
+      if(key==='particlesEnabled')particles.setActive(v);
+      if(key==='animationsEnabled')anim.setEnabled(v);
+      if(key==='twoPlayerMode'){const p2=document.getElementById('score-p2-row');if(p2)p2.style.display=v?'flex':'none';}
+    });
+  });
+
+  // Bot emotion buttons
+  document.querySelectorAll('.bot-emotion-pick').forEach(btn=>btn.addEventListener('click',()=>bot.setEmotion(btn.dataset.emotion,4000)));
+
+  // Close settings on outside tap
+  document.addEventListener('click',e=>{
+    const p=document.getElementById('settings-panel');const b=document.getElementById('settings-btn');
+    if(p?.classList.contains('active')&&!p.contains(e.target)&&e.target!==b)p.classList.remove('active');
+  });
+
+  // Greeting
+  setTimeout(()=>{bot.setEmotion('excited',3000);bot.speak('greeting');},800);
+
+  window._quizApp={quiz,bot,anim,particles,settings,terminal};
+})();
+</script>
+</body>
+</html>
